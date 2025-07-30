@@ -1,8 +1,10 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
 @theme{
-  --font-prime: var(--font-pacifico);
-  --font-body: var(--font-poppins);
+  --font-prime: "Pacifico", sans-serif;
+  --font-body: "Poppins", sans-serif;
   --color-body: #3F3F46;
   --background-body: #E4E4E7;
 }
@@ -12,4 +14,29 @@ body {
   background-color: var(--background-body);
   color: var(--color-body);
   font-family: var(--font-body);
+}
+
+/* =====================  Skeleton animation ===================== */
+
+skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.skeleton-shimmer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  animation: shimmer 1.6s infinite;
+}
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
 }
