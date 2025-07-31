@@ -2,13 +2,12 @@
 
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
-@theme{
+@theme {
   --font-prime: "Pacifico", sans-serif;
   --font-body: "Poppins", sans-serif;
-  --color-body: #3F3F46;
-  --background-body: #E4E4E7;
+  --color-body: #3f3f46;
+  --background-body: #e4e4e7;
 }
-
 
 body {
   background-color: var(--background-body);
@@ -36,6 +35,17 @@ skeleton-shimmer {
   animation: shimmer 1.6s infinite;
 }
 @keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* ===================== animation ===================== */
+
+@keyframes sweep {
+  0% {
+    transform: translateX(-100%);
+  }
   100% {
     transform: translateX(100%);
   }
