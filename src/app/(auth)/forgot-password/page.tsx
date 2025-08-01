@@ -10,9 +10,9 @@ const ForgotForm = dynamic(() => import("@/components/AuthForms/ForgotForm"), {
 
 const ForgotPassword = () => {
   return (
-    <div>
+    <>
       <ForgotForm/>
-    </div>
+    </>
   )
 }
 
