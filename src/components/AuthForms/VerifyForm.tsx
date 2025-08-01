@@ -12,7 +12,7 @@ const VerifyForm = () => {
 
   const [loading, setLoading] = useState(false);
 
-  const handleRegister = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleVerify = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
   };
 
@@ -29,7 +29,7 @@ const VerifyForm = () => {
         </p>
 
         <form
-          onSubmit={handleRegister}
+          onSubmit={handleVerify}
           className="flex flex-col gap-3 mt-[2vh] md:mt-[2vw] px-[2vh] mx:px-0"
         >
 
