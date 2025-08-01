@@ -22,7 +22,7 @@ const ResetForm = () => {
     <AuthLayout>
       <div className="w-full md:w-[25vw] p-[2px] rounded-lg md:bg-gradient-to-r from-[#FF6B6B] via-pink-500 to-violet-500">
         <div className="flex flex-col w-full h-full rounded-lg bg-zinc-200 dark:bg-zinc-900 md:p-[1vw]">
-          <h1 className="md:text-[2vw] text-[3.5vh] font-semibold text-center">
+          <h1 className="md:text-[2vw] text-[3.5vh] font-semibold text-center dark:text-zinc-200">
             Reset Password
           </h1>
 
