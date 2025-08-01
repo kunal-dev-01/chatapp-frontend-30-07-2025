@@ -1,10 +1,66 @@
 import React from "react";
 import Image from "next/image";
 
+function SpinningSova() {
+  const text = "sova • sova • sova • sova •";
+  const letters = text.split("");
+  const radius = 60; // Increased for better spacing
+  const diameter = radius * 2;
+
+  return (
+    <div
+      className="relative"
+      style={{
+        width: diameter,
+        height: diameter,
+        animation: "spin 10s linear infinite",
+      }}
+    >
+      {/* 🔵 Bigger Center Circle */}
+      <div
+        className="absolute bg-gradient-to-br from-purple-400 to-blue-400 rounded-full 
+                   border border-violet-400 shadow-md"
+        style={{
+          width: radius * 0.9,
+          height: radius * 0.9,
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          zIndex: 10,
+        }}
+      />
+
+      {/* 🔠 Circular Text */}
+      {letters.map((letter, index) => {
+        const angle = (360 / letters.length) * index;
+        const rad = (angle * Math.PI) / 180;
+        const x = Math.cos(rad) * radius + radius;
+        const y = Math.sin(rad) * radius + radius;
+
+        return (
+          <span
+            key={index}
+            className="absolute text-zinc-700 dark:text-zinc-200 text-[0.85vw] font-medium"
+            style={{
+              left: x,
+              top: y,
+              transform: `translate(-50%, -50%) rotate(${angle + 90}deg)`,
+              transformOrigin: "center",
+              whiteSpace: "pre",
+            }}
+          >
+            {letter}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
 const FirstArea = () => {
   return (
     <div className="w-full flex md:flex-row flex-col select-none">
-      <div className="flex-1/2 transform md:translate-y-[10vw] translate-y-[4vh]">
+      <div className="flex-1/2 flex-col transform md:translate-y-[10vw] translate-y-[4vh]">
         <h1 className="md:text-[3vw] tracking-tight leading-none text-[4vh] font-semibold">
           Chat faster feel <br /> closer stay connected <br />
           with{" "}
@@ -13,13 +69,26 @@ const FirstArea = () => {
           </span>{" "}
           today
         </h1>
+
+        <div className="hidden md:flex md:mt-[2vw]">
+          <p className="md:text-[1vw] w-[30vw]">
+            Sova brings the future of messaging to your fingertips. Fast,
+            private, and beautifully designed for real-life conversations.
+            Whether it's one-on-one chats or everyday groups, Sova keeps you
+            close, with zero hassle and full focus.
+          </p>
+
+          <div className="ml-5">
+            <SpinningSova />
+          </div>
+        </div>
       </div>
 
-      <div className="flex-1/2 mt-[9vh] md:mt-0">
+      <div className="flex-1/2 mt-[9vh] md:mt-[2vw]">
         <Image
           src="/main-banner.webp"
-          width={4000}
-          height={4000}
+          width={2000}
+          height={2000}
           alt="main-banner"
           loading="eager"
           priority
