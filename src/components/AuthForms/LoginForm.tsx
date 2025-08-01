@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import AuthLayout from "../Layouts/AuthLayout";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { Loader2 } from "lucide-react";
 
 const Input = dynamic(() => import("@/components/Layouts/AuthInput"), {
   ssr: false,
@@ -11,6 +12,8 @@ const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const [loading, setLoading] = useState(false);
+
   const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
   };
@@ -19,7 +22,7 @@ const LoginForm = () => {
     <AuthLayout>
       <div className="w-full md:w-[25vw] p-[2px] rounded-lg md:bg-gradient-to-r from-[#FF6B6B] via-pink-500 to-violet-500">
         <div className="flex flex-col w-full h-full rounded-lg bg-zinc-200 dark:bg-zinc-900 md:p-[1vw]">
-          <h1 className="md:text-[2.2vw] text-[3.5vh] font-semibold text-center">
+          <h1 className="md:text-[2vw] text-[3.5vh] font-semibold text-center">
             Welcome Back
           </h1>
 
@@ -52,10 +55,16 @@ const LoginForm = () => {
 
             <button
               type="submit"
+              disabled={loading}
               className="w-full py-2 mt-3 rounded-md font-medium text-white 
              bg-gradient-to-r from-[#9668c2] to-[#7a4dc4] cursor-pointer"
             >
-              Log In
+              {loading ? (
+                <div className="flex items-center gap-2 justify-center">
+                  <Loader2 size={20} className="animate-spin" /> 
+                  <span>Loging...</span>
+                </div>
+              ) : "Log In"}
             </button>
           </form>
 
