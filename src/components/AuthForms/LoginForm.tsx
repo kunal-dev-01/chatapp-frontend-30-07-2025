@@ -1,8 +1,9 @@
 import React from 'react'
+import AuthLayout from '../Layouts/AuthLayout'
 
 const LoginForm = () => {
   return (
-    <div>LoginForm</div>
+    <AuthLayout>LoginForm</AuthLayout>
   )
 }
 

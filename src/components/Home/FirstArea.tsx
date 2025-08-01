@@ -1,10 +1,19 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 
 function SpinningSova() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    // Only run on client
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null; // prevent SSR mismatch
+
   const text = "sova • sova • sova • sova •";
   const letters = text.split("");
-  const radius = 60; // Increased for better spacing
+  const radius = 60;
   const diameter = radius * 2;
 
   return (
@@ -42,8 +51,8 @@ function SpinningSova() {
             key={index}
             className="absolute text-zinc-700 dark:text-zinc-200 text-[0.85vw] font-medium"
             style={{
-              left: x,
-              top: y,
+              left: `${x}px`,
+              top: `${y}px`,
               transform: `translate(-50%, -50%) rotate(${angle + 90}deg)`,
               transformOrigin: "center",
               whiteSpace: "pre",

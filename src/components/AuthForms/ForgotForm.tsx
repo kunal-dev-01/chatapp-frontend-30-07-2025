@@ -1,8 +1,9 @@
 import React from 'react'
+import AuthLayout from '../Layouts/AuthLayout'
 
 const ForgotForm = () => {
   return (
-    <div>ForgotForm</div>
+    <AuthLayout>ForgotForm</AuthLayout>
   )
 }
 
