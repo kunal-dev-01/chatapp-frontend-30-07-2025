@@ -16,7 +16,7 @@ const ResetLinkSend = dynamic(() => import("./ResetLinkSend"), {
 
 const ForgotForm = () => {
   const [email, setEmail] = useState("");
-  const [submit, setSubmit] = useState(true);
+  const [submit, setSubmit] = useState(false);
 
   const [loading, setLoading] = useState(false);
 

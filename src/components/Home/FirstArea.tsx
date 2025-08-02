@@ -83,7 +83,7 @@ const FirstArea = () => {
           <p className="md:text-[1vw] w-[30vw]">
             Sova brings the future of messaging to your fingertips. Fast,
             private, and beautifully designed for real-life conversations.
-            Whether it's one-on-one chats or everyday groups, Sova keeps you
+            Whether it&apos;s one-on-one chats or everyday groups, Sova keeps you
             close, with zero hassle and full focus.
           </p>
 
