@@ -7,7 +7,7 @@ const HomeNavbar = dynamic(() => import("@/components/Navbars/HomeNavbar/HomeNav
   loading: () => <Skeleton width="w-full" height="md:h-[4vw] h-[7vh]" rounded="rounded-b-md" animation="shimmer" />,
 });
 
-const FirstArea = dynamic(() => import("@/components/Home/FirstArea"), {
+const FirstArea = dynamic(() => import("@/components/Home/FirstArea/FirstArea"), {
   loading: () => <Skeleton width="w-full" height="md:h-[80vh] h-[60vh]" rounded="rounded-md" animation="shimmer" className='mt-2'/>,
 });
 

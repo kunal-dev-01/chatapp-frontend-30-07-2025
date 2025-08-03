@@ -41,7 +41,6 @@ function createRipple(evt: PointerEvent): void {
 
 /*  Convenience auto-initializer  */
 export function initRipples(selector = '[data-ripple]'): void {
-  document.addEventListener('DOMContentLoaded', () =>
-    document.querySelectorAll<HTMLElement>(selector).forEach(addRipple)
-  );
+  // Remove DOMContentLoaded wrapper for React
+  document.querySelectorAll<HTMLElement>(selector).forEach(addRipple);
 }
