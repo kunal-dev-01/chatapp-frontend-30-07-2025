@@ -57,11 +57,12 @@ skeleton-shimmer {
   }
 }
 
-
 /* ===================== Loader ===================== */
 
 @keyframes bounceDot {
-  0%, 80%, 100% {
+  0%,
+  80%,
+  100% {
     transform: scale(0.8);
     opacity: 0.4;
   }
@@ -75,7 +76,7 @@ skeleton-shimmer {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: linear-gradient(to bottom right, #FF6B6B, #EC4899, #E4D9FF);
+  background: linear-gradient(to bottom right, #ff6b6b, #ec4899, #e4d9ff);
   animation: bounceDot 1s infinite ease-in-out;
   display: inline-block;
 }
@@ -88,16 +89,15 @@ skeleton-shimmer {
   animation-delay: 0.3s;
 }
 
-
 /* =====================  Ripple ===================== */
 
 /* Ripple container – invisible, sits on top of the element */
 .ripple-container {
   position: absolute;
-  inset: 0;                    /* top 0 right 0 bottom 0 left 0  */
-  pointer-events: none;        /* let clicks pass through         */
+  inset: 0; /* top 0 right 0 bottom 0 left 0  */
+  pointer-events: none; /* let clicks pass through         */
   overflow: hidden;
-  border-radius: inherit;      /* respect parent border-radius    */
+  border-radius: inherit; /* respect parent border-radius    */
 }
 
 /* The actual ripple */
@@ -105,18 +105,17 @@ skeleton-shimmer {
   position: absolute;
   border-radius: 50%;
   transform: scale(0);
-  background: rgba(255, 255, 255, 0.5);   /* white ripple – change colour here */
+  background: rgba(255, 255, 255, 0.72); /* white ripple – change colour here */
   animation: ripple 600ms linear;
   pointer-events: none;
 }
 
 @keyframes ripple {
   to {
-    transform: scale(4);       /* 4× the click distance = fade out */
+    transform: scale(4); /* 4× the click distance = fade out */
     opacity: 0;
   }
 }
-
 
 /* =====================  Scrollbar ===================== */
 
@@ -132,6 +131,25 @@ skeleton-shimmer {
   border-radius: 8px;
 }
 
-
 /* =====================  Hide scrollbar ===================== */
 
+/* ===================== Glass effect ===================== */
+
+.glass-nav {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+}
+
+.nav-item {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nav-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
