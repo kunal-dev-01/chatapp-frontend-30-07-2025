@@ -4,7 +4,7 @@ import Link from "next/link";
 import { MessageSquareText, UsersRound, User, Settings } from 'lucide-react';
 
 interface LinkItem {
-  icon: React.ComponentType<any>;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   url: string;
   tab: string;
 }
