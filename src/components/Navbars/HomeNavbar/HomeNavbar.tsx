@@ -17,7 +17,7 @@ const ItemsAndAuth = dynamic(() => import("./ItemsAndAuth"), {
 
 const HomeNavbar = () => {
   return (
-    <nav className="w-full md:h-[4vw] h-[7vh] md:px-[10vw] px-[1vh] flex items-center justify-between">
+    <nav className="w-full md:h-[4vw] h-[7vh] md:px-[10vw] px-[1vh] flex items-center justify-between sticky top-0 z-50 bg-transparent backdrop-blur-md">
       {/* Logo */}
 
       <div

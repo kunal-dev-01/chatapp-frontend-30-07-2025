@@ -27,11 +27,10 @@ function SpinningSova() {
     >
       {/* 🔵 Bigger Center Circle */}
       <div
-        className="absolute bg-gradient-to-br from-purple-400 to-blue-400 rounded-full 
-                   border border-violet-400 shadow-md"
+        className="absolute bg-gradient-to-br from-purple-400 to-blue-400 rounded-full border border-violet-400 shadow-md"
         style={{
-          width: radius * 0.9,
-          height: radius * 0.9,
+          width: radius * 1.2,
+          height: radius * 1.2,
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",

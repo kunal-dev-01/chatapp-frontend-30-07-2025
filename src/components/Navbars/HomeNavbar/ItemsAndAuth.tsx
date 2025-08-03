@@ -32,7 +32,7 @@ const ItemsAndAuth = () => {
           <button
             type="button"
             aria-label="auth-button"
-            className="group relative inline-flex items-center justify-center cursor-pointer select-none rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 px-[3vh] py-[.8vh] text-sm font-semibold text-white transition-all duration-300 ease-out hover:shadow-xl hover:shadow-indigo-500/50 md:px-[2vw] md:py-[.4vw] focus:outline-none focus:ring-4 focus:ring-indigo-500/40 active:scale-95 overflow-hidden"
+            className="group relative inline-flex items-center justify-center cursor-pointer select-none rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 px-[3vh] py-[.8vh] text-sm font-semibold text-white transition-all duration-300 ease-out md:px-[2vw] md:py-[.4vw] focus:outline-none focus:ring-4 focus:ring-indigo-500/40 active:scale-95 overflow-hidden"
           >
             {/* Continuous sweep */}
             <span

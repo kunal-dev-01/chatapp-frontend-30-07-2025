@@ -87,3 +87,51 @@ skeleton-shimmer {
 .delay-300 {
   animation-delay: 0.3s;
 }
+
+
+/* =====================  Ripple ===================== */
+
+/* Ripple container – invisible, sits on top of the element */
+.ripple-container {
+  position: absolute;
+  inset: 0;                    /* top 0 right 0 bottom 0 left 0  */
+  pointer-events: none;        /* let clicks pass through         */
+  overflow: hidden;
+  border-radius: inherit;      /* respect parent border-radius    */
+}
+
+/* The actual ripple */
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  transform: scale(0);
+  background: rgba(255, 255, 255, 0.5);   /* white ripple – change colour here */
+  animation: ripple 600ms linear;
+  pointer-events: none;
+}
+
+@keyframes ripple {
+  to {
+    transform: scale(4);       /* 4× the click distance = fade out */
+    opacity: 0;
+  }
+}
+
+
+/* =====================  Scrollbar ===================== */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #e4e4e7;
+}
+::-webkit-scrollbar-thumb {
+  background: #3f3f46;
+  border-radius: 8px;
+}
+
+
+/* =====================  Hide scrollbar ===================== */
+
