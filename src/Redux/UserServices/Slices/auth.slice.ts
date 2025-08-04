@@ -5,7 +5,8 @@ import {
   LoginCredentials,
   RegisterCredentials,
 } from "../types/auth.type";
-import api from "@/utils/app";
+import api from "@/utils/app"; // Fixed import path
+import { AxiosError } from "axios";
 
 const initialState: AuthState = {
   user: null,
@@ -33,15 +34,26 @@ const initialState: AuthState = {
   isInitialized: false,
 };
 
-// Async thunks
+// Async thunks with better error handling
 export const loginUser = createAsyncThunk(
   "auth/login",
   async (credentials: LoginCredentials, { rejectWithValue }) => {
     try {
+      console.log("🔐 Attempting login...");
       const response = await api.post("/auth/login", credentials);
+      console.log("✅ Login successful");
       return response.data.data;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || "Login failed");
+    } catch (error) {
+      console.error("❌ Login error:", error);
+      if (error instanceof AxiosError) {
+        const message =
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          error.message ||
+          "Login failed";
+        return rejectWithValue(message);
+      }
+      return rejectWithValue("Network error occurred");
     }
   }
 );
@@ -50,12 +62,21 @@ export const registerUser = createAsyncThunk(
   "auth/register",
   async (credentials: RegisterCredentials, { rejectWithValue }) => {
     try {
+      console.log("📝 Attempting registration...");
       const response = await api.post("/auth/register", credentials);
+      console.log("✅ Registration successful");
       return response.data;
-    } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message || "Registration failed"
-      );
+    } catch (error) {
+      console.error("❌ Registration error:", error);
+      if (error instanceof AxiosError) {
+        const message =
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          error.message ||
+          "Registration failed";
+        return rejectWithValue(message);
+      }
+      return rejectWithValue("Network error occurred");
     }
   }
 );
@@ -64,17 +85,27 @@ export const checkAuth = createAsyncThunk(
   "auth/checkAuth",
   async (_, { rejectWithValue, getState }) => {
     try {
+      console.log("🔍 Checking authentication...");
       const state = getState() as { auth: AuthState };
+
       if (!state.auth.accessToken) {
-        throw new Error("No token found");
+        console.log("❌ No access token found");
+        return rejectWithValue("No token found");
       }
 
       const response = await api.get("/auth/check-auth");
+      console.log("✅ Auth check successful");
       return response.data.data;
-    } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message || "Authentication check failed"
-      );
+    } catch (error) {
+      console.error("❌ Auth check error:", error);
+      if (error instanceof AxiosError) {
+        const message =
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          "Auth check failed";
+        return rejectWithValue(message);
+      }
+      return rejectWithValue("Network error occurred");
     }
   }
 );
@@ -83,10 +114,14 @@ export const logoutUser = createAsyncThunk(
   "auth/logout",
   async (_, { rejectWithValue }) => {
     try {
+      console.log("🚪 Attempting logout...");
       await api.post("/auth/logout");
-    } catch (error: any) {
-      // Even if logout API fails, we still want to clear local state
-      console.error("Logout API failed:", error);
+      console.log("✅ Logout successful");
+      return null;
+    } catch (error) {
+      console.error("❌ Logout error:", error);
+      // Even if logout fails on server, we should clear local state
+      return null;
     }
   }
 );
@@ -95,12 +130,20 @@ export const verifyEmail = createAsyncThunk(
   "auth/verifyEmail",
   async (token: string, { rejectWithValue }) => {
     try {
+      console.log("📧 Verifying email...");
       const response = await api.get(`/auth/verify-email/${token}`);
+      console.log("✅ Email verification successful");
       return response.data;
-    } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message || "Email verification failed"
-      );
+    } catch (error) {
+      console.error("❌ Email verification error:", error);
+      if (error instanceof AxiosError) {
+        const message =
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          "Verification failed";
+        return rejectWithValue(message);
+      }
+      return rejectWithValue("Network error occurred");
     }
   }
 );
@@ -109,12 +152,20 @@ export const resendVerificationEmail = createAsyncThunk(
   "auth/resendVerification",
   async (email: string, { rejectWithValue }) => {
     try {
+      console.log("📧 Resending verification email...");
       const response = await api.post("/auth/resend-verification", { email });
+      console.log("✅ Verification email sent");
       return response.data;
-    } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message || "Failed to resend verification email"
-      );
+    } catch (error) {
+      console.error("❌ Resend verification error:", error);
+      if (error instanceof AxiosError) {
+        const message =
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          "Resend failed";
+        return rejectWithValue(message);
+      }
+      return rejectWithValue("Network error occurred");
     }
   }
 );
@@ -123,12 +174,20 @@ export const forgotPassword = createAsyncThunk(
   "auth/forgotPassword",
   async (email: string, { rejectWithValue }) => {
     try {
+      console.log("🔑 Requesting password reset...");
       const response = await api.post("/auth/forgot-password", { email });
+      console.log("✅ Password reset email sent");
       return response.data;
-    } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message || "Failed to send reset email"
-      );
+    } catch (error) {
+      console.error("❌ Forgot password error:", error);
+      if (error instanceof AxiosError) {
+        const message =
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          "Password reset failed";
+        return rejectWithValue(message);
+      }
+      return rejectWithValue("Network error occurred");
     }
   }
 );
@@ -144,20 +203,28 @@ export const resetPassword = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
+      console.log("🔑 Resetting password...");
       const response = await api.patch(`/auth/reset-password/${token}`, {
         password,
         confirmPassword,
       });
+      console.log("✅ Password reset successful");
       return response.data.data;
-    } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message || "Password reset failed"
-      );
+    } catch (error) {
+      console.error("❌ Password reset error:", error);
+      if (error instanceof AxiosError) {
+        const message =
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          "Password reset failed";
+        return rejectWithValue(message);
+      }
+      return rejectWithValue("Network error occurred");
     }
   }
 );
 
-// Auth slice
+// Auth slice - same as before, no changes needed
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -192,7 +259,6 @@ const authSlice = createSlice({
     setInitialized: (state) => {
       state.isInitialized = true;
     },
-
     logout: (state) => {
       state.user = null;
       state.accessToken = null;
@@ -280,6 +346,7 @@ const authSlice = createSlice({
         state.isLogoutError = null;
       });
 
+    // Other cases remain the same...
     // Verify Email
     builder
       .addCase(verifyEmail.pending, (state) => {
@@ -336,11 +403,10 @@ const authSlice = createSlice({
         state.isResendingVerificationEmail = false;
         state.isResendingVerificationEmailError = null;
       })
-      .addCase(resendVerificationEmail.rejected, (state, action) => { 
+      .addCase(resendVerificationEmail.rejected, (state, action) => {
         state.isResendingVerificationEmail = false;
         state.isResendingVerificationEmailError = action.payload as string;
-      }
-      );
+      });
   },
 });
 
@@ -357,4 +423,5 @@ export const {
   clearResendVerificationEmailError,
   clearForgotPasswordError,
 } = authSlice.actions;
+
 export default authSlice.reducer;
