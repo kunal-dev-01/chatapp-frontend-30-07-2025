@@ -2,17 +2,23 @@ import React, { useState } from "react";
 import AuthLayout from "../Layouts/AuthLayout";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { Loader2, Mail, CheckCircle, AlertCircle } from "lucide-react";
+import { Loader2, Mail, CheckCircle} from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/Redux/Hooks/reduxHook";
-import { registerUser, resendVerificationEmail } from "@/Redux/UserServices/Slices/auth.slice";
+import { registerUser, resendVerificationEmail,clearRegiterError,clearResendVerificationEmailError } from "@/Redux/UserServices/Slices/auth.slice";
 
 const Input = dynamic(() => import("@/components/Layouts/AuthInput"), {
   ssr: false,
 });
 
+const ErrorAlert = dynamic(() => import("../Common/ErrorAlert"), {
+  ssr: false,
+});
+
+
+
 const RegisterForm = () => {
   const dispatch = useAppDispatch();
-  const { isRegistering, isRegisteredError } = useAppSelector((state) => state.auth);
+  const { isRegistering, isRegisteredError,isResendingVerificationEmailError,isResendingVerificationEmail } = useAppSelector((state) => state.auth);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -22,9 +28,7 @@ const RegisterForm = () => {
   });
 
   const [registrationStep, setRegistrationStep] = useState<'form' | 'success'>('form');
-  const [resendLoading, setResendLoading] = useState(false);
   const [resendMessage, setResendMessage] = useState("");
-  const [resendError, setResendError] = useState("");
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -49,14 +53,8 @@ const RegisterForm = () => {
   };
 
   const handleResendVerification = async () => {
-    if (!formData.email) {
-      setResendError("Email is required to resend verification");
-      return;
-    }
 
-    setResendLoading(true);
     setResendMessage("");
-    setResendError("");
 
     try {
       const result = await dispatch(resendVerificationEmail(formData.email)).unwrap();
@@ -65,9 +63,9 @@ const RegisterForm = () => {
         setResendMessage("Verification email sent successfully! Please check your inbox.");
       }
     } catch (error: any) {
-      setResendError(error || "Failed to resend verification email");
+      setResendMessage(error || "Failed to resend verification email");
     } finally {
-      setResendLoading(false);
+      setResendMessage("");
     }
   };
 
@@ -125,27 +123,25 @@ const RegisterForm = () => {
                   </div>
                 )}
 
-                {resendError && (
-                  <div className="mb-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
-                      <p className="text-sm text-red-700 dark:text-red-300">
-                        {resendError}
-                      </p>
-                    </div>
-                  </div>
+                {isResendingVerificationEmailError && (
+                  <ErrorAlert
+                    error={isResendingVerificationEmailError}
+                    onClear={() => dispatch(clearResendVerificationEmailError())}
+                    autoClose={false}
+                    className="mb-3"
+                  />
                 )}
 
                 <button
                   onClick={handleResendVerification}
-                  disabled={resendLoading}
+                  disabled={isResendingVerificationEmail}
                   className="w-full py-2 rounded-md font-medium text-white 
                            bg-gradient-to-r from-[#9668c2] to-[#7a4dc4] 
                            hover:from-[#8557b3] hover:to-[#6b42b5] 
                            disabled:opacity-50 disabled:cursor-not-allowed
                            transition-all duration-200"
                 >
-                  {resendLoading ? (
+                  {isResendingVerificationEmail ? (
                     <div className="flex items-center gap-2 justify-center">
                       <Loader2 size={16} className="animate-spin" />
                       <span>Sending...</span>
@@ -187,12 +183,12 @@ const RegisterForm = () => {
           </p>
 
           {isRegisteredError && (
-            <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg mx-[2vh] md:mx-0">
-              <div className="flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
-                <p className="text-sm text-red-700 dark:text-red-300">{isRegisteredError}</p>
-              </div>
-            </div>
+            <ErrorAlert
+              error={isRegisteredError}
+              onClear={() => dispatch(clearRegiterError())}
+              autoClose={false}
+              className="mt-4 mx-[2vh] md:mx-0"
+            />
           )}
 
           <form

@@ -5,7 +5,10 @@ import dynamic from "next/dynamic";
 import { Loader2, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { useAppDispatch, useAppSelector } from "@/Redux/Hooks/reduxHook";
-import { forgotPassword, clearForgotPasswordError } from "@/Redux/UserServices/Slices/auth.slice";
+import {
+  forgotPassword,
+  clearForgotPasswordError,
+} from "@/Redux/UserServices/Slices/auth.slice";
 
 const Input = dynamic(() => import("@/components/Layouts/AuthInput"), {
   ssr: false,
@@ -14,6 +17,10 @@ const Input = dynamic(() => import("@/components/Layouts/AuthInput"), {
 const ResetLinkSend = dynamic(() => import("./ResetLinkSend"), {
   ssr: false,
   loading: () => <Loader />,
+});
+
+const ErrorAlert = dynamic(() => import("../Common/ErrorAlert"), {
+  ssr: false,
 });
 
 const ForgotForm = () => {
@@ -27,7 +34,7 @@ const ForgotForm = () => {
 
   const handleForgot = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
+
     if (!email.trim()) {
       return;
     }
@@ -37,18 +44,9 @@ const ForgotForm = () => {
       setIsEmailSent(true);
     } catch (error) {
       // Error handling is done by Redux
-      console.error('Forgot password failed:', error);
+      console.error("Forgot password failed:", error);
     }
   };
-
-  // Clear error when component mounts
-  useEffect(() => {
-    return () => {
-      if (isForgotPasswordError) {
-        dispatch(clearForgotPasswordError());
-      }
-    };
-  }, [dispatch, isForgotPasswordError]);
 
   const isFormValid = () => {
     return email.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -70,12 +68,12 @@ const ForgotForm = () => {
             </p>
 
             {isForgotPasswordError && (
-              <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg mx-[2vh] md:mx-0">
-                <div className="flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
-                  <p className="text-sm text-red-700 dark:text-red-300">{isForgotPasswordError}</p>
-                </div>
-              </div>
+              <ErrorAlert
+                error={isForgotPasswordError}
+                onClear={() => dispatch(clearForgotPasswordError())}
+                autoClose={false}
+                className="mb-3"
+              />
             )}
 
             <form

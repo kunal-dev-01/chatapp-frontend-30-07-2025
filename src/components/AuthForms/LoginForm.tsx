@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import AuthLayout from "../Layouts/AuthLayout";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/Redux/Hooks/reduxHook";
 import {
@@ -11,6 +11,10 @@ import {
 } from "@/Redux/UserServices/Slices/auth.slice";
 
 const Input = dynamic(() => import("@/components/Layouts/AuthInput"), {
+  ssr: false,
+});
+
+const ErrorAlert = dynamic(() => import("../Common/ErrorAlert"), {
   ssr: false,
 });
 
@@ -52,18 +56,10 @@ const LoginForm = () => {
   // Redirect on successful authentication
   useEffect(() => {
     if (isAuthenticated) {
-      router.push("/dashboard"); // or wherever you want to redirect
+      router.push("/user/?tab=chats"); // or wherever you want to redirect
     }
   }, [isAuthenticated, router]);
 
-  // Clear error when component mounts
-  useEffect(() => {
-    return () => {
-      if (isLoginError) {
-        dispatch(clearLoginError());
-      }
-    };
-  }, [dispatch, isLoginError]);
 
   const isFormValid = () => {
     return formData.identifier.trim() && formData.password.trim();
@@ -82,14 +78,12 @@ const LoginForm = () => {
           </p>
 
           {isLoginError && (
-            <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg mx-[2vh] md:mx-0">
-              <div className="flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
-                <p className="text-sm text-red-700 dark:text-red-300">
-                  {isLoginError}
-                </p>
-              </div>
-            </div>
+            <ErrorAlert
+              error={isLoginError}
+              onClear={() => dispatch(clearLoginError())}
+              autoClose={false}
+              className="mt-4 mx-[2vh] md:mx-0"
+            />
           )}
 
           <form

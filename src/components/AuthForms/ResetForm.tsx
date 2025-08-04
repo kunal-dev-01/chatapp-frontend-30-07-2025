@@ -11,6 +11,10 @@ const Input = dynamic(() => import("@/components/Layouts/AuthInput"), {
   ssr: false,
 });
 
+const ErrorAlert = dynamic(() => import("../Common/ErrorAlert"), {
+  ssr: false,
+});
+
 interface ResetFormProps {
   token?: string;
 }
@@ -94,18 +98,10 @@ const ResetForm: React.FC<ResetFormProps> = ({ token }) => {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated && !isSuccess) {
-      router.push('/dashboard');
+      router.push('/user/?tab=chats'); // or wherever you want to redirect
     }
   }, [isAuthenticated, router, isSuccess]);
 
-  // Clear error when component mounts
-  useEffect(() => {
-    return () => {
-      if (isResettingPasswordError) {
-        dispatch(clearResetPasswordError());
-      }
-    };
-  }, [dispatch, isResettingPasswordError]);
 
   // Check if token exists
   useEffect(() => {
@@ -174,14 +170,15 @@ const ResetForm: React.FC<ResetFormProps> = ({ token }) => {
           </p>
 
           {(isResettingPasswordError || validationError) && (
-            <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg mx-[2vh] md:mx-0">
-              <div className="flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
-                <p className="text-sm text-red-700 dark:text-red-300">
-                  {isResettingPasswordError || validationError}
-                </p>
-              </div>
-            </div>
+            <ErrorAlert
+              error={isResettingPasswordError || validationError}
+              onClear={() => {
+                dispatch(clearResetPasswordError());
+                setValidationError("");
+              }}
+              autoClose={false}
+              className="mt-4 mx-[2vh] md:mx-0"
+            />
           )}
 
           <form

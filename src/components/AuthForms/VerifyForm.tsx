@@ -4,10 +4,15 @@ import Link from 'next/link';
 import { CheckCircle, XCircle, Loader2, Mail } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/Redux/Hooks/reduxHook';
 import { verifyEmail, resendVerificationEmail } from '@/Redux/UserServices/Slices/auth.slice';
+import dynamic from 'next/dynamic';
 
 interface VerifyFormProps {
   token?: string;
 }
+
+const ErrorAlert = dynamic(() => import("../Common/ErrorAlert"), {
+  ssr: false,
+});
 
 const VerifyForm: React.FC<VerifyFormProps> = ({ token }) => {
   const dispatch = useAppDispatch();
