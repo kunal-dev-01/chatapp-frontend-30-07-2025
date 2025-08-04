@@ -1,21 +1,72 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AuthLayout from "../Layouts/AuthLayout";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useAppDispatch, useAppSelector } from "@/Redux/Hooks/reduxHook";
+import {
+  loginUser,
+  clearLoginError,
+} from "@/Redux/UserServices/Slices/auth.slice";
 
 const Input = dynamic(() => import("@/components/Layouts/AuthInput"), {
   ssr: false,
 });
 
 const LoginForm = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { isLoggingIn, isLoginError, isAuthenticated } = useAppSelector(
+    (state) => state.auth
+  );
 
-  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    identifier: "",
+    password: "",
+  });
 
-  const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleInputChange = (field: string, value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (!formData.identifier.trim() || !formData.password.trim()) {
+      return;
+    }
+
+    try {
+      await dispatch(loginUser(formData)).unwrap();
+      // Success - redirect will be handled by useEffect
+    } catch (error) {
+      // Error handling is done by Redux
+      console.error("Login failed:", error);
+    }
+  };
+
+  // Redirect on successful authentication
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/dashboard"); // or wherever you want to redirect
+    }
+  }, [isAuthenticated, router]);
+
+  // Clear error when component mounts
+  useEffect(() => {
+    return () => {
+      if (isLoginError) {
+        dispatch(clearLoginError());
+      }
+    };
+  }, [dispatch, isLoginError]);
+
+  const isFormValid = () => {
+    return formData.identifier.trim() && formData.password.trim();
   };
 
   return (
@@ -30,41 +81,59 @@ const LoginForm = () => {
             We're happy to see you again! Log in below
           </p>
 
+          {isLoginError && (
+            <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg mx-[2vh] md:mx-0">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
+                <p className="text-sm text-red-700 dark:text-red-300">
+                  {isLoginError}
+                </p>
+              </div>
+            </div>
+          )}
+
           <form
             onSubmit={handleLogin}
-            className="flex flex-col gap-3 mt-[2vh] md:mt-[2vw] px-[2vh] mx:px-0"
+            className="flex flex-col gap-3 mt-[2vh] md:mt-[2vw] px-[2vh] md:px-0"
           >
             <Input
               label="Email or Username"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              value={formData.identifier}
+              onChange={(e) => handleInputChange("identifier", e.target.value)}
+              required
             />
             <Input
               label="Password"
               type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={formData.password}
+              onChange={(e) => handleInputChange("password", e.target.value)}
+              required
             />
 
             <Link href="/forgot-password" className="select-none">
               <p className="text-sm text-zinc-600 dark:text-zinc-400 cursor-pointer pl-2 hover:underline">
-                Forgot Password
+                Forgot Password?
               </p>
             </Link>
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={isLoggingIn || !isFormValid()}
               className="w-full py-2 mt-3 rounded-md font-medium text-white 
-             bg-gradient-to-r from-[#9668c2] to-[#7a4dc4] cursor-pointer"
+                       bg-gradient-to-r from-[#9668c2] to-[#7a4dc4] 
+                       hover:from-[#8557b3] hover:to-[#6b42b5]
+                       disabled:opacity-50 disabled:cursor-not-allowed
+                       transition-all duration-200"
             >
-              {loading ? (
+              {isLoggingIn ? (
                 <div className="flex items-center gap-2 justify-center">
-                  <Loader2 size={20} className="animate-spin" /> 
-                  <span>Loging...</span>
+                  <Loader2 size={20} className="animate-spin" />
+                  <span>Signing In...</span>
                 </div>
-              ) : "Log In"}
+              ) : (
+                "Sign In"
+              )}
             </button>
           </form>
 

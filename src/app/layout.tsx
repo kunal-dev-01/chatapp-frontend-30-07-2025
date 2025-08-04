@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Pacifico, Poppins } from "next/font/google";
+import ReduxProvider from "@/Redux/Provider/ReduxProvider";
 import "./globals.css";
 
 const pacifico = Pacifico({
@@ -33,7 +34,7 @@ export default function RootLayout({
         className={`${pacifico.variable} ${poppins.variable} antialiased`}
         cz-shortcut-listen="true"
       >
-        {children}
+        <ReduxProvider>{children}</ReduxProvider>
       </body>
     </html>
   );

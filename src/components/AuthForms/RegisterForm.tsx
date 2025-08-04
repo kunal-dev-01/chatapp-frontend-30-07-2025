@@ -2,107 +2,266 @@ import React, { useState } from "react";
 import AuthLayout from "../Layouts/AuthLayout";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { Loader2 } from "lucide-react";
-import Loader from "../Layouts/Loader";
+import { Loader2, Mail, CheckCircle, AlertCircle } from "lucide-react";
+import { useAppDispatch, useAppSelector } from "@/Redux/Hooks/reduxHook";
+import { registerUser, resendVerificationEmail } from "@/Redux/UserServices/Slices/auth.slice";
 
 const Input = dynamic(() => import("@/components/Layouts/AuthInput"), {
   ssr: false,
 });
 
-const VerifyForm = dynamic(() => import("./VerifyForm"), {
-  ssr: false,
-  loading: () => <Loader />,
-});
-
 const RegisterForm = () => {
-  const [name, setName] = useState("");
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [submit, setSubmit] = useState(false);
+  const dispatch = useAppDispatch();
+  const { isRegistering, isRegisteredError } = useAppSelector((state) => state.auth);
 
-  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    fullName: "",
+    username: "",
+    email: "",
+    password: "",
+  });
 
-  const handleRegister = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setSubmit(true);
+  const [registrationStep, setRegistrationStep] = useState<'form' | 'success'>('form');
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendMessage, setResendMessage] = useState("");
+  const [resendError, setResendError] = useState("");
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
+
+  const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
+    try {
+      const result = await dispatch(registerUser(formData)).unwrap();
+      
+      if (result.status === 'success') {
+        setRegistrationStep('success');
+      }
+    } catch (error) {
+      // Error handling is done by Redux
+      console.error('Registration failed:', error);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!formData.email) {
+      setResendError("Email is required to resend verification");
+      return;
+    }
+
+    setResendLoading(true);
+    setResendMessage("");
+    setResendError("");
+
+    try {
+      const result = await dispatch(resendVerificationEmail(formData.email)).unwrap();
+      
+      if (result.status === 'success') {
+        setResendMessage("Verification email sent successfully! Please check your inbox.");
+      }
+    } catch (error: any) {
+      setResendError(error || "Failed to resend verification email");
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
+  const isFormValid = () => {
+    return formData.fullName.trim() && 
+           formData.username.trim() && 
+           formData.email.trim() && 
+           formData.password.trim();
+  };
+
+  if (registrationStep === 'success') {
+    return (
+      <AuthLayout>
+        <div className="w-full md:w-[30vw] p-[2px] rounded-lg md:bg-gradient-to-r from-[#FF6B6B] via-pink-500 to-violet-500">
+          <div className="flex flex-col w-full h-full rounded-lg bg-zinc-200 dark:bg-zinc-900 md:p-[2vw]">
+            <div className="text-center">
+              <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mb-4">
+                <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
+              </div>
+              
+              <h1 className="md:text-[2vw] text-[3.5vh] font-semibold dark:text-zinc-200 mb-2">
+                Check Your Email!
+              </h1>
+              
+              <p className="text-sm md:text-md text-zinc-600 dark:text-zinc-400 mb-6">
+                We've sent a verification link to <br />
+                <span className="font-semibold text-[#9668c2]">{formData.email}</span>
+              </p>
+
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+                <div className="flex items-start gap-3">
+                  <Mail className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+                  <div className="text-sm text-blue-700 dark:text-blue-300">
+                    <p className="font-medium mb-1">Next Steps:</p>
+                    <ul className="space-y-1 text-xs">
+                      <li>• Check your email inbox</li>
+                      <li>• Click the verification link</li>
+                      <li>• Return here to sign in</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Resend Section */}
+              <div className="border-t border-zinc-300 dark:border-zinc-700 pt-4">
+                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-3">
+                  Didn't receive the email?
+                </p>
+                
+                {resendMessage && (
+                  <div className="mb-3 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                    <p className="text-sm text-green-700 dark:text-green-300">
+                      {resendMessage}
+                    </p>
+                  </div>
+                )}
+
+                {resendError && (
+                  <div className="mb-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
+                      <p className="text-sm text-red-700 dark:text-red-300">
+                        {resendError}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                <button
+                  onClick={handleResendVerification}
+                  disabled={resendLoading}
+                  className="w-full py-2 rounded-md font-medium text-white 
+                           bg-gradient-to-r from-[#9668c2] to-[#7a4dc4] 
+                           hover:from-[#8557b3] hover:to-[#6b42b5] 
+                           disabled:opacity-50 disabled:cursor-not-allowed
+                           transition-all duration-200"
+                >
+                  {resendLoading ? (
+                    <div className="flex items-center gap-2 justify-center">
+                      <Loader2 size={16} className="animate-spin" />
+                      <span>Sending...</span>
+                    </div>
+                  ) : (
+                    "Resend Verification Email"
+                  )}
+                </button>
+              </div>
+
+              <div className="mt-6 pt-4 border-t border-zinc-300 dark:border-zinc-700">
+                <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                  Already verified?{" "}
+                  <Link
+                    href="/login"
+                    className="text-[#9668c2] hover:underline cursor-pointer font-semibold"
+                  >
+                    Sign In
+                  </Link>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </AuthLayout>
+    );
+  }
 
   return (
     <AuthLayout>
-      {submit ? (
-        <VerifyForm />
-      ) : (
-        <div className="w-full md:w-[25vw] p-[2px] rounded-lg md:bg-gradient-to-r from-[#FF6B6B] via-pink-500 to-violet-500">
-          <div className="flex flex-col w-full h-full rounded-lg bg-zinc-200 dark:bg-zinc-900 md:p-[1vw]">
-            <h1 className="md:text-[2vw] text-[3.5vh] font-semibold text-center dark:text-zinc-200">
-              Create an account
-            </h1>
+      <div className="w-full md:w-[25vw] p-[2px] rounded-lg md:bg-gradient-to-r from-[#FF6B6B] via-pink-500 to-violet-500">
+        <div className="flex flex-col w-full h-full rounded-lg bg-zinc-200 dark:bg-zinc-900 md:p-[1vw]">
+          <h1 className="md:text-[2vw] text-[3.5vh] font-semibold text-center dark:text-zinc-200">
+            Create an account
+          </h1>
 
-            <p className="text-sm md:text-md text-zinc-600 dark:text-zinc-400 text-center mt-1">
-              Please fill in the form below
-            </p>
+          <p className="text-sm md:text-md text-zinc-600 dark:text-zinc-400 text-center mt-1">
+            Please fill in the form below
+          </p>
 
-            <form
-              onSubmit={handleRegister}
-              className="flex flex-col gap-3 mt-[2vh] md:mt-[2vw] px-[2vh] mx:px-0"
+          {isRegisteredError && (
+            <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg mx-[2vh] md:mx-0">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
+                <p className="text-sm text-red-700 dark:text-red-300">{isRegisteredError}</p>
+              </div>
+            </div>
+          )}
+
+          <form
+            onSubmit={handleRegister}
+            className="flex flex-col gap-3 mt-[2vh] md:mt-[2vw] px-[2vh] md:px-0"
+          >
+            <Input
+              label="Full Name"
+              type="text"
+              value={formData.fullName}
+              onChange={(e) => handleInputChange('fullName', e.target.value)}
+              required
+            />
+
+            <Input
+              label="Username"
+              type="text"
+              value={formData.username}
+              onChange={(e) => handleInputChange('username', e.target.value)}
+              required
+            />
+
+            <Input
+              label="Email"
+              type="email"
+              value={formData.email}
+              onChange={(e) => handleInputChange('email', e.target.value)}
+              required
+            />
+            
+            <Input
+              label="Password"
+              type="password"
+              value={formData.password}
+              onChange={(e) => handleInputChange('password', e.target.value)}
+              required
+            />
+
+            <button
+              type="submit"
+              disabled={isRegistering || !isFormValid()}
+              className="w-full py-2 mt-3 rounded-md font-medium text-white 
+                       bg-gradient-to-r from-[#9668c2] to-[#7a4dc4] 
+                       hover:from-[#8557b3] hover:to-[#6b42b5]
+                       disabled:opacity-50 disabled:cursor-not-allowed
+                       transition-all duration-200"
             >
-              <Input
-                label="Full Name"
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
+              {isRegistering ? (
+                <div className="flex items-center gap-2 justify-center">
+                  <Loader2 size={20} className="animate-spin" />
+                  <span>Creating Account...</span>
+                </div>
+              ) : (
+                "Create Account"
+              )}
+            </button>
+          </form>
 
-              <Input
-                label="Username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-              />
-
-              <Input
-                label="Email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <Input
-                label="Password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-2 mt-3 rounded-md font-medium text-white 
-             bg-gradient-to-r from-[#9668c2] to-[#7a4dc4] cursor-pointer"
-              >
-                {loading ? (
-                  <div className="flex items-center gap-2 justify-center">
-                    <Loader2 size={20} className="animate-spin" />
-                    <span>Signing Up...</span>
-                  </div>
-                ) : (
-                  "Sign Up"
-                )}
-              </button>
-            </form>
-
-            <p className="text-sm text-zinc-600 dark:text-zinc-400 text-center mt-5 select-none">
-              Already have an account?{" "}
-              <Link
-                href="/login"
-                className="text-[#9668c2] hover:underline cursor-pointer font-semibold"
-              >
-                Sign In
-              </Link>
-            </p>
-          </div>
+          <p className="text-sm text-zinc-600 dark:text-zinc-400 text-center mt-5 select-none">
+            Already have an account?{" "}
+            <Link
+              href="/login"
+              className="text-[#9668c2] hover:underline cursor-pointer font-semibold"
+            >
+              Sign In
+            </Link>
+          </p>
         </div>
-      )}
+      </div>
     </AuthLayout>
   );
 };

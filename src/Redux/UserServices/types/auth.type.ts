@@ -83,8 +83,25 @@ export interface AuthState {
   user: User | null;
   accessToken: string | null;
   isAuthenticated: boolean;
-  isLoading: boolean;
-  error: string | null;
+
+  isCheckingAuth: boolean;
+  isRegistering: boolean;
+  isLoggingIn: boolean;
+  isVerifyingEmail: boolean;
+  isResendingVerificationEmail: boolean;
+  isLogoutting: boolean;
+  isForgotPassword: boolean;
+  isResettingPassword: boolean;
+
+  isCheckingAuthError: string | null;
+  isRegisteredError: string | null;
+  isLoginError: string | null;
+  isVerifyingEmailError: string | null;
+  isResendingVerificationEmailError: string | null;
+  isLogoutError: string | null;
+  isForgotPasswordError: string | null;
+  isResettingPasswordError: string | null;
+
   isInitialized: boolean;
 }
 
