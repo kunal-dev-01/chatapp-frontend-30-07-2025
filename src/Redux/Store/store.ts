@@ -1,22 +1,23 @@
 import { configureStore } from '@reduxjs/toolkit';
-import { persistStore, persistReducer } from 'redux-persist';
+import { persistStore, persistReducer, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import { combineReducers } from '@reduxjs/toolkit';
 import authReducer from '@/Redux/UserServices/Slices/auth.slice';
 
+// Persist configuration
 const persistConfig = {
   key: 'root',
   storage,
   whitelist: ['auth'], // Only persist auth state
+  version: 1,
 };
 
+// Create root reducer
 const rootReducer = combineReducers({
   auth: authReducer,
-  // Future slices can be added here
-  // chat: chatReducer,
-  // users: usersReducer,
 });
 
+// Apply persistence to root reducer
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 export const store = configureStore({
@@ -24,9 +25,17 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
+        ignoredActions: [
+          FLUSH,
+          REHYDRATE,
+          PAUSE,
+          PERSIST,
+          PURGE,
+          REGISTER,
+        ],
       },
     }),
+  devTools: process.env.NODE_ENV !== 'production',
 });
 
 export const persistor = persistStore(store);

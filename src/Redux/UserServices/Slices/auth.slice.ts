@@ -240,6 +240,26 @@ const authSlice = createSlice({
       state.isLogoutError = null;
       state.isInitialized = false;
     },
+    resetLoadingStates: (state) => {
+      // Reset all loading states and errors on app initialization
+      state.isCheckingAuth = false;
+      state.isRegistering = false;
+      state.isLoggingIn = false;
+      state.isVerifyingEmail = false;
+      state.isResendingVerificationEmail = false;
+      state.isLogoutting = false;
+      state.isForgotPassword = false;
+      state.isResettingPassword = false;
+      
+      state.isCheckingAuthError = null;
+      state.isRegisteredError = null;
+      state.isLoginError = null;
+      state.isVerifyingEmailError = null;
+      state.isResendingVerificationEmailError = null;
+      state.isLogoutError = null;
+      state.isForgotPasswordError = null;
+      state.isResettingPasswordError = null;
+    },
   },
   extraReducers: (builder) => {
     // Login Cases
@@ -400,6 +420,7 @@ export const {
   updateUser,
   setInitialized,
   logout,
+  resetLoadingStates,
   clearLogoutError,
   clearLoginError,
   clearResetPasswordError,
