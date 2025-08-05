@@ -4,7 +4,6 @@ import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from '../Store/store';
 import { Toaster } from 'react-hot-toast';
-import AuthGuard from '../Guards/AuthGuard';
 import Loader from '@/components/Layouts/Loader';
 
 interface ReduxProviderProps {
@@ -22,9 +21,7 @@ const ReduxProvider: React.FC<ReduxProviderProps> = ({ children }) => {
         } 
         persistor={persistor}
       >
-        <AuthGuard>
           {children}
-        </AuthGuard>
         <Toaster position="top-center" />
       </PersistGate>
     </Provider>

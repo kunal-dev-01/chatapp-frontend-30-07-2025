@@ -15,6 +15,9 @@ const persistConfig = {
 // Create root reducer
 const rootReducer = combineReducers({
   auth: authReducer,
+  // Future slices can be added here
+  // chat: chatReducer,
+  // users: usersReducer,
 });
 
 // Apply persistence to root reducer

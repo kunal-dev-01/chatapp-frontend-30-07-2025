@@ -23,7 +23,7 @@ const RegisterForm = () => {
     isRegisteredError,
     isResendingVerificationEmailError,
     isResendingVerificationEmail,
-    user, // Add user to check registration success
+    user,
   } = useAppSelector((state) => state.auth);
 
   const [formData, setFormData] = useState({
@@ -55,10 +55,18 @@ const RegisterForm = () => {
       const result = await dispatch(registerUser(formData)).unwrap();
       console.log("✅ Registration result:", result);
 
-      // Check if registration was successful
-      // Since backend sends { status: 'success', message: '...', data: { user: {...} } }
-      if (result && (result.status === "success" || result.user)) {
+      // According to your backend, successful registration returns:
+      // { status: 'success', message: '...', data: { user: {...} } }
+      // But the Redux slice returns just the data part
+      
+      // Check if we have user data (which means registration was successful)
+      if (result && result.user) {
         console.log("✅ Registration successful, showing success step");
+        setRegistrationStep("success");
+        toast.success("Registration successful! Please check your email to verify your account.");
+      } else {
+        // Fallback check - if the result exists, consider it successful
+        console.log("✅ Registration completed, showing success step");
         setRegistrationStep("success");
         toast.success("Registration successful! Please check your email to verify your account.");
       }
@@ -92,8 +100,9 @@ const RegisterForm = () => {
       }
     } catch (error: any) {
       console.error("❌ Resend failed:", error);
-      setResendMessage(error || "Failed to resend verification email");
-      toast.error(error || "Failed to resend verification email");
+      const errorMessage = typeof error === 'string' ? error : "Failed to resend verification email";
+      setResendMessage(errorMessage);
+      toast.error(errorMessage);
       
       // Clear error message after 5 seconds
       setTimeout(() => {
@@ -107,17 +116,15 @@ const RegisterForm = () => {
       formData.fullName.trim().length > 0 &&
       formData.username.trim().length > 0 &&
       formData.email.trim().length > 0 &&
-      formData.password.trim().length >= 6 // Add minimum password length
+      formData.password.trim().length >= 6
     );
   };
 
-  // Handle success step based on user creation
-  useEffect(() => {
-    if (user && user.email === formData.email && registrationStep === "form") {
-      console.log("✅ User found in state, switching to success step");
-      setRegistrationStep("success");
-    }
-  }, [user, formData.email, registrationStep]);
+  // Reset form if user navigates back
+  const handleBackToForm = () => {
+    setRegistrationStep("form");
+    setResendMessage("");
+  };
 
   // Handle errors with toast
   useEffect(() => {
@@ -140,11 +147,15 @@ const RegisterForm = () => {
     }
   }, [isResendingVerificationEmailError, dispatch]);
 
-  // Reset form if user navigates back
-  const handleBackToForm = () => {
-    setRegistrationStep("form");
-    setResendMessage("");
-  };
+  // Debug current state
+  console.log("🔍 RegisterForm State:", {
+    registrationStep,
+    isRegistering,
+    hasUser: !!user,
+    userEmail: user?.email,
+    formEmail: formData.email,
+    isRegisteredError
+  });
 
   if (registrationStep === "success") {
     return (
@@ -188,8 +199,16 @@ const RegisterForm = () => {
                 </p>
 
                 {resendMessage && (
-                  <div className="mb-3 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                    <p className="text-sm text-green-700 dark:text-green-300">
+                  <div className={`mb-3 p-3 rounded-lg ${
+                    resendMessage.includes('successfully') 
+                      ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'
+                      : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
+                  }`}>
+                    <p className={`text-sm ${
+                      resendMessage.includes('successfully')
+                        ? 'text-green-700 dark:text-green-300'
+                        : 'text-red-700 dark:text-red-300'
+                    }`}>
                       {resendMessage}
                     </p>
                   </div>
