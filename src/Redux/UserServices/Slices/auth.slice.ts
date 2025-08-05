@@ -40,7 +40,7 @@ const initialState: AuthState = {
   },
 };
 
-// Utility function to extract error message
+// Enhanced utility function to extract error message
 const extractErrorMessage = (error: unknown): string => {
   console.log("🔍 Full error object:", error);
 
@@ -48,90 +48,67 @@ const extractErrorMessage = (error: unknown): string => {
     const errorData = error.response?.data;
     console.log("🔍 Error response data:", errorData);
     console.log("🔍 Error status:", error.response?.status);
-    console.log("🔍 Error headers:", error.response?.headers);
 
-    // Backend error response format: { status: 'error', message: '...', statusCode: 400 }
-    if (errorData?.message) {
-      return errorData.message;
-    }
+    // Check for your backend error format: { status: 'error', message: '...', statusCode: 400, errors?: [...] }
+    if (errorData) {
+      // If there are validation errors array, combine them
+      if (errorData.errors && Array.isArray(errorData.errors)) {
+        const validationMessages = errorData.errors.map((err: any) => {
+          // Handle different error formats
+          if (typeof err === "string") return err;
+          if (err.message) return err.message;
+          if (err.field && err.message) return `${err.field}: ${err.message}`;
+          return JSON.stringify(err);
+        });
+        
+        // Return combined validation errors
+        if (validationMessages.length > 0) {
+          return validationMessages.join(". ");
+        }
+      }
 
-    // Handle validation errors array
-    if (errorData?.errors && Array.isArray(errorData.errors)) {
-      const errorMessages = errorData.errors.map((err: any) => {
-        if (typeof err === "string") return err;
-        if (err.message) return err.message;
-        if (err.field && err.message) return `${err.field}: ${err.message}`;
-        return JSON.stringify(err);
-      });
-      return errorMessages.join(", ");
-    }
+      // Main error message from your backend
+      if (errorData.message) {
+        return errorData.message;
+      }
 
-    // Handle different error formats
-    if (errorData?.error && typeof errorData.error === "string") {
-      return errorData.error;
-    }
+      // Handle nested error structures
+      if (errorData.error?.message) {
+        return errorData.error.message;
+      }
 
-    // Handle nested data.message
-    if (errorData?.data?.message) {
-      return errorData.data.message;
-    }
-
-    // Handle status-specific errors
-    if (error.response?.status) {
-      switch (error.response.status) {
-        case 400:
-          return (
-            errorData?.message ||
-            "Invalid request. Please check your input and try again."
-          );
-        case 401:
-          return (
-            errorData?.message || "Unauthorized. Please check your credentials."
-          );
-        case 403:
-          return errorData?.message || "Access forbidden.";
-        case 404:
-          return errorData?.message || "Resource not found.";
-        case 409:
-          return errorData?.message || "Resource already exists.";
-        case 422:
-          return (
-            errorData?.message || "Validation failed. Please check your input."
-          );
-        case 500:
-          return errorData?.message || "Server error. Please try again later.";
-        default:
-          return (
-            errorData?.message ||
-            `Error ${error.response.status}: Something went wrong.`
-          );
+      if (errorData.data?.message) {
+        return errorData.data.message;
       }
     }
 
-    // Network or connection errors
-    if (error.code === "ECONNABORTED") {
-      return "Request timeout. Please check your connection and try again.";
-    }
-
-    if (
-      error.code === "ERR_NETWORK" ||
-      error.message.includes("Network Error")
-    ) {
-      return "Network error. Please check your internet connection and try again.";
-    }
-
-    if (error.code === "ECONNREFUSED") {
-      return "Unable to connect to server. Please try again later.";
-    }
-
-    // Fallback to axios error message
-    if (error.message) {
-      return error.message;
+    // Handle different HTTP status codes
+    const status = error.response?.status;
+    switch (status) {
+      case 400:
+        return errorData?.message || "Invalid request. Please check your input.";
+      case 401:
+        return errorData?.message || "Invalid credentials.";
+      case 403:
+        return errorData?.message || "Access forbidden.";
+      case 404:
+        return errorData?.message || "Resource not found.";
+      case 409:
+        return errorData?.message || "Resource already exists.";
+      case 422:
+        return errorData?.message || "Validation failed.";
+      case 500:
+        return errorData?.message || "Server error. Please try again later.";
+      default:
+        return errorData?.message || `Error ${status}: Something went wrong.`;
     }
   }
 
-  // Handle generic Error objects
+  // Handle network errors
   if (error instanceof Error) {
+    if (error.message.includes("Network Error")) {
+      return "Network error. Please check your connection.";
+    }
     return error.message;
   }
 
@@ -142,6 +119,24 @@ const extractErrorMessage = (error: unknown): string => {
 
   // Last resort
   return "An unexpected error occurred. Please try again.";
+};
+
+// Enhanced function to extract validation errors
+const extractValidationErrors = (error: unknown): string[] => {
+  if (error instanceof AxiosError) {
+    const errorData = error.response?.data;
+    
+    if (errorData?.errors && Array.isArray(errorData.errors)) {
+      return errorData.errors.map((err: any) => {
+        if (typeof err === "string") return err;
+        if (err.message) return err.message;
+        if (err.field && err.message) return `${err.field}: ${err.message}`;
+        return JSON.stringify(err);
+      });
+    }
+  }
+  
+  return [];
 };
 
 // Async thunks
@@ -160,17 +155,15 @@ export const registerUser = createAsyncThunk<
     return response.data;
   } catch (error) {
     console.error("❌ Registration error:", error);
+    
     const errorMessage = extractErrorMessage(error);
-    const statusCode =
-      error instanceof AxiosError ? error.response?.status : undefined;
+    const validationErrors = extractValidationErrors(error);
+    const statusCode = error instanceof AxiosError ? error.response?.status : undefined;
 
     return rejectWithValue({
       message: errorMessage,
       statusCode,
-      errors:
-        error instanceof AxiosError && error.response?.data?.errors
-          ? error.response.data.errors
-          : undefined,
+      errors: validationErrors.length > 0 ? validationErrors : undefined,
     });
   }
 });
@@ -189,17 +182,15 @@ export const verifyEmail = createAsyncThunk<
     return response.data;
   } catch (error) {
     console.error("❌ Email verification error:", error);
+    
     const errorMessage = extractErrorMessage(error);
-    const statusCode =
-      error instanceof AxiosError ? error.response?.status : undefined;
+    const validationErrors = extractValidationErrors(error);
+    const statusCode = error instanceof AxiosError ? error.response?.status : undefined;
 
     return rejectWithValue({
       message: errorMessage,
       statusCode,
-      errors:
-        error instanceof AxiosError && error.response?.data?.errors
-          ? error.response.data.errors
-          : undefined,
+      errors: validationErrors.length > 0 ? validationErrors : undefined,
     });
   }
 });
@@ -219,17 +210,15 @@ export const resendVerificationEmail = createAsyncThunk<
     return response.data;
   } catch (error) {
     console.error("❌ Resend verification error:", error);
+    
     const errorMessage = extractErrorMessage(error);
-    const statusCode =
-      error instanceof AxiosError ? error.response?.status : undefined;
+    const validationErrors = extractValidationErrors(error);
+    const statusCode = error instanceof AxiosError ? error.response?.status : undefined;
 
     return rejectWithValue({
       message: errorMessage,
       statusCode,
-      errors:
-        error instanceof AxiosError && error.response?.data?.errors
-          ? error.response.data.errors
-          : undefined,
+      errors: validationErrors.length > 0 ? validationErrors : undefined,
     });
   }
 });
@@ -241,53 +230,32 @@ const authSlice = createSlice({
   reducers: {
     // Clear register state
     clearRegisterState: (state) => {
-      if (!state.register) {
-        state.register = {
-          loading: false,
-          error: null,
-          success: false,
-          message: null,
-        };
-      } else {
-        state.register.loading = false;
-        state.register.error = null;
-        state.register.success = false;
-        state.register.message = null;
-      }
+      state.register = {
+        loading: false,
+        error: null,
+        success: false,
+        message: null,
+      };
     },
 
     // Clear verify email state
     clearVerifyEmailState: (state) => {
-      if (!state.verifyEmail) {
-        state.verifyEmail = {
-          loading: false,
-          error: null,
-          success: false,
-          message: null,
-        };
-      } else {
-        state.verifyEmail.loading = false;
-        state.verifyEmail.error = null;
-        state.verifyEmail.success = false;
-        state.verifyEmail.message = null;
-      }
+      state.verifyEmail = {
+        loading: false,
+        error: null,
+        success: false,
+        message: null,
+      };
     },
 
     // Clear resend verification state
     clearResendVerificationState: (state) => {
-      if (!state.resendVerification) {
-        state.resendVerification = {
-          loading: false,
-          error: null,
-          success: false,
-          message: null,
-        };
-      } else {
-        state.resendVerification.loading = false;
-        state.resendVerification.error = null;
-        state.resendVerification.success = false;
-        state.resendVerification.message = null;
-      }
+      state.resendVerification = {
+        loading: false,
+        error: null,
+        success: false,
+        message: null,
+      };
     },
 
     // Clear all auth states
@@ -325,73 +293,38 @@ const authSlice = createSlice({
     // Register user
     builder
       .addCase(registerUser.pending, (state) => {
-        if (!state.register) {
-          state.register = {
-            loading: false,
-            error: null,
-            success: false,
-            message: null,
-          };
-        }
         state.register.loading = true;
         state.register.error = null;
         state.register.success = false;
         state.register.message = null;
       })
       .addCase(registerUser.fulfilled, (state, action) => {
-        if (!state.register) {
-          state.register = {
-            loading: false,
-            error: null,
-            success: false,
-            message: null,
-          };
-        }
         state.register.loading = false;
         state.register.error = null;
         state.register.success = true;
         state.register.message = action.payload.message;
       })
       .addCase(registerUser.rejected, (state, action) => {
-        if (!state.register) {
-          state.register = {
-            loading: false,
-            error: null,
-            success: false,
-            message: null,
-          };
-        }
         state.register.loading = false;
         state.register.error = action.payload?.message || "Registration failed";
         state.register.success = false;
         state.register.message = null;
+        
+        // Log validation errors for debugging
+        if (action.payload?.errors) {
+          console.log("🔍 Validation errors:", action.payload.errors);
+        }
       });
 
     // Verify email
     builder
       .addCase(verifyEmail.pending, (state) => {
-        if (!state.verifyEmail) {
-          state.verifyEmail = {
-            loading: false,
-            error: null,
-            success: false,
-            message: null,
-          };
-        }
         state.verifyEmail.loading = true;
         state.verifyEmail.error = null;
         state.verifyEmail.success = false;
         state.verifyEmail.message = null;
       })
       .addCase(verifyEmail.fulfilled, (state, action) => {
-        if (!state.verifyEmail) {
-          state.verifyEmail = {
-            loading: false,
-            error: null,
-            success: false,
-            message: null,
-          };
-        }
         state.verifyEmail.loading = false;
         state.verifyEmail.error = null;
         state.verifyEmail.success = true;
@@ -403,17 +336,8 @@ const authSlice = createSlice({
         }
       })
       .addCase(verifyEmail.rejected, (state, action) => {
-        if (!state.verifyEmail) {
-          state.verifyEmail = {
-            loading: false,
-            error: null,
-            success: false,
-            message: null,
-          };
-        }
         state.verifyEmail.loading = false;
-        state.verifyEmail.error =
-          action.payload?.message || "Email verification failed";
+        state.verifyEmail.error = action.payload?.message || "Email verification failed";
         state.verifyEmail.success = false;
         state.verifyEmail.message = null;
       });
@@ -421,45 +345,20 @@ const authSlice = createSlice({
     // Resend verification email
     builder
       .addCase(resendVerificationEmail.pending, (state) => {
-        if (!state.resendVerification) {
-          state.resendVerification = {
-            loading: false,
-            error: null,
-            success: false,
-            message: null,
-          };
-        }
         state.resendVerification.loading = true;
         state.resendVerification.error = null;
         state.resendVerification.success = false;
         state.resendVerification.message = null;
       })
       .addCase(resendVerificationEmail.fulfilled, (state, action) => {
-        if (!state.resendVerification) {
-          state.resendVerification = {
-            loading: false,
-            error: null,
-            success: false,
-            message: null,
-          };
-        }
         state.resendVerification.loading = false;
         state.resendVerification.error = null;
         state.resendVerification.success = true;
         state.resendVerification.message = action.payload.message;
       })
       .addCase(resendVerificationEmail.rejected, (state, action) => {
-        if (!state.resendVerification) {
-          state.resendVerification = {
-            loading: false,
-            error: null,
-            success: false,
-            message: null,
-          };
-        }
         state.resendVerification.loading = false;
-        state.resendVerification.error =
-          action.payload?.message || "Failed to resend verification email";
+        state.resendVerification.error = action.payload?.message || "Failed to resend verification email";
         state.resendVerification.success = false;
         state.resendVerification.message = null;
       });
