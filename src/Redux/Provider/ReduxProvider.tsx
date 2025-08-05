@@ -6,6 +6,8 @@ import { store, persistor } from '../Store/store';
 import { Toaster } from 'react-hot-toast';
 import Loader from '@/components/Layouts/Loader';
 
+import {AuthCheck} from '../Hooks/CheckAuth';
+
 interface ReduxProviderProps {
   children: React.ReactNode;
 }
@@ -21,7 +23,7 @@ const ReduxProvider: React.FC<ReduxProviderProps> = ({ children }) => {
         } 
         persistor={persistor}
       >
-          {children}
+          <AuthCheck>{children}</AuthCheck>
         <Toaster position="top-center" />
       </PersistGate>
     </Provider>

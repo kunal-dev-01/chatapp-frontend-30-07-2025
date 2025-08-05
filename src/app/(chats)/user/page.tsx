@@ -61,9 +61,9 @@ const Chats = () => {
   const searchParams = useSearchParams();
   const tab = searchParams.get("tab");
 
-  const {accessToken } = useAppSelector((state) => state.auth);
+  const {accessToken ,user} = useAppSelector((state) => state.auth);
 
-  console.log(accessToken)
+  console.log(accessToken,user)
 
 
   return (
