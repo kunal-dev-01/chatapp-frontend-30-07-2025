@@ -2,306 +2,308 @@ import React, { useEffect, useState } from "react";
 import AuthLayout from "../Layouts/AuthLayout";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { Loader2, Mail, CheckCircle } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/Redux/Hooks/reduxHook";
 import {
   registerUser,
-  resendVerificationEmail,
   clearRegisterState,
   clearResendVerificationState,
 } from "@/Redux/UserServices/Slices/auth.slice";
 import { toast } from "react-hot-toast";
+import { RegisterRequest } from "@/Redux/UserServices/types/auth.type";
 
-const Input = dynamic(() => import("@/components/Layouts/AuthInput"), {
+const EmailVerificationSuccess = dynamic(() => import("./EmailVerificationSuccess"), {
   ssr: false,
 });
 
-const RegisterForm = () => {
+// Dynamic imports for better performance
+const Input = dynamic(() => import("@/components/Layouts/AuthInput"), {
+  ssr: false,
+  loading: () => <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+});
+
+interface FormData extends RegisterRequest {
+  // Extending RegisterRequest ensures type safety
+}
+
+interface ValidationErrors {
+  [key: string]: string;
+}
+
+const RegisterForm: React.FC = () => {
   const dispatch = useAppDispatch();
   
-  // Use the correct selectors from the new slice
+  // Redux selectors with proper typing
   const registerState = useAppSelector((state) => state.auth.register);
   const resendVerificationState = useAppSelector((state) => state.auth.resendVerification);
 
-  const [formData, setFormData] = useState({
+  // Local state
+  const [formData, setFormData] = useState<FormData>({
     fullName: "",
     username: "",
     email: "",
     password: "",
   });
 
-  const [registrationStep, setRegistrationStep] = useState<"form" | "success">(
-    "form"
-  );
-  const [resendMessage, setResendMessage] = useState("");
+  const [registrationStep, setRegistrationStep] = useState<"form" | "success">("form");
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
 
-  const handleInputChange = (field: string, value: string) => {
+  // Form validation rules
+  const validateForm = (): boolean => {
+    const errors: ValidationErrors = {};
+
+    // Full name validation
+    if (formData.fullName.trim().length < 2) {
+      errors.fullName = "Full name must be at least 2 characters";
+    } else if (formData.fullName.trim().length > 50) {
+      errors.fullName = "Full name must be less than 50 characters";
+    }
+
+    // Username validation
+    if (formData.username.trim().length < 3) {
+      errors.username = "Username must be at least 3 characters";
+    } else if (formData.username.trim().length > 30) {
+      errors.username = "Username must be less than 30 characters";
+    } else if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
+      errors.username = "Username can only contain letters, numbers, and underscores";
+    }
+
+    // Email validation
+    if (!formData.email.trim()) {
+      errors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errors.email = "Please enter a valid email address";
+    }
+
+    // Password validation
+    if (formData.password.length < 8) {
+      errors.password = "Password must be at least 8 characters";
+    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
+      errors.password = "Password must contain uppercase, lowercase, and number";
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  // Form utilities
+  const isFormValid = (): boolean => {
+    return (
+      formData.fullName.trim().length >= 2 &&
+      formData.username.trim().length >= 3 &&
+      formData.email.trim().length > 0 &&
+      formData.password.trim().length >= 8 &&
+      Object.keys(validationErrors).length === 0
+    );
+  };
+
+  // Event handlers
+  const handleInputChange = (field: keyof FormData, value: string): void => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
+
+    // Clear validation error for this field when user starts typing
+    if (validationErrors[field]) {
+      setValidationErrors(prev => ({
+        ...prev,
+        [field]: ""
+      }));
+    }
   };
 
-  const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleRegister = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
 
     console.log("🚀 Starting registration process...");
-    console.log("Form data:", formData);
+    
+    // Clear previous errors
+    setValidationErrors({});
+
+    // Client-side validation
+    if (!validateForm()) {
+      console.log("❌ Client-side validation failed");
+      return;
+    }
 
     try {
       const result = await dispatch(registerUser(formData)).unwrap();
       console.log("✅ Registration result:", result);
 
-      // Check if registration was successful
-      if (result && result.status === 'success') {
+      if (result?.status === 'success') {
         console.log("✅ Registration successful, showing success step");
         setRegistrationStep("success");
-        toast.success(result.message || "Registration successful! Please check your email to verify your account.");
+        toast.success(result.message || "Registration successful! Please check your email.");
       }
     } catch (error) {
       console.error("❌ Registration failed:", error);
-      // Error is already handled by Redux and will show via toast
+      // Error handling is done in useEffect
     }
   };
 
-  const handleResendVerification = async () => {
-    console.log("🔄 Resending verification email to:", formData.email);
-    setResendMessage("");
-
-    try {
-      const result = await dispatch(
-        resendVerificationEmail({ email: formData.email })
-      ).unwrap();
-
-      console.log("✅ Resend result:", result);
-
-      if (result && result.status === "success") {
-        setResendMessage(
-          result.message || "Verification email sent successfully! Please check your inbox."
-        );
-        toast.success(result.message || "Verification email sent successfully!");
-        
-        // Clear message after 5 seconds
-        setTimeout(() => {
-          setResendMessage("");
-        }, 5000);
-      }
-    } catch (error: any) {
-      console.error("❌ Resend failed:", error);
-      const errorMessage = typeof error === 'string' ? error : "Failed to resend verification email";
-      setResendMessage(errorMessage);
-      toast.error(errorMessage);
-      
-      // Clear error message after 5 seconds
-      setTimeout(() => {
-        setResendMessage("");
-      }, 5000);
-    }
-  };
-
-  const isFormValid = () => {
-    return (
-      formData.fullName.trim().length >= 2 &&
-      formData.username.trim().length >= 3 &&
-      formData.email.trim().length > 0 &&
-      formData.password.trim().length >= 8
-    );
-  };
-
-  // Reset form if user navigates back
-  const handleBackToForm = () => {
+  const handleBackToForm = (): void => {
     setRegistrationStep("form");
-    setResendMessage("");
-    // Clear any existing states
+    setValidationErrors({});
     dispatch(clearRegisterState());
     dispatch(clearResendVerificationState());
   };
 
-  // Handle registration errors with toast
+  // Error handling effects
   useEffect(() => {
     if (registerState?.error) {
+      console.log("🔍 Registration error:", registerState.error);
+      
       toast.error(registerState.error, {
-        duration: 4000,
+        duration: 5000,
+        icon: <AlertCircle className="w-5 h-5" />,
       });
-      // Clear the error after showing toast
-      setTimeout(() => {
+      
+      // Clear error state
+      const timer = setTimeout(() => {
         dispatch(clearRegisterState());
       }, 100);
+      
+      return () => clearTimeout(timer);
     }
   }, [registerState?.error, dispatch]);
 
-  // Handle resend verification errors with toast
   useEffect(() => {
     if (resendVerificationState?.error) {
+      console.log("🔍 Resend verification error:", resendVerificationState.error);
+      
       toast.error(resendVerificationState.error, {
-        duration: 4000,
+        duration: 5000,
+        icon: <AlertCircle className="w-5 h-5" />,
       });
-      // Clear the error after showing toast
-      setTimeout(() => {
+      
+      // Clear error state
+      const timer = setTimeout(() => {
         dispatch(clearResendVerificationState());
       }, 100);
+      
+      return () => clearTimeout(timer);
     }
   }, [resendVerificationState?.error, dispatch]);
 
+  // Render success step
   if (registrationStep === "success") {
     return (
-      <AuthLayout>
-        <div className="w-full md:w-[30vw] p-[2px] rounded-lg md:bg-gradient-to-r from-[#FF6B6B] via-pink-500 to-violet-500">
-          <div className="flex flex-col w-full h-full rounded-lg bg-zinc-200 dark:bg-zinc-900 md:p-[2vw]">
-            <div className="text-center">
-              <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mb-4">
-                <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
-              </div>
-
-              <h1 className="md:text-[2vw] text-[3.5vh] font-semibold dark:text-zinc-200 mb-2">
-                Check Your Email!
-              </h1>
-
-              <p className="text-sm md:text-md text-zinc-600 dark:text-zinc-400 mb-6">
-                We've sent a verification link to <br />
-                <span className="font-semibold text-[#9668c2]">
-                  {formData.email}
-                </span>
-              </p>
-
-              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
-                <div className="flex items-start gap-3">
-                  <Mail className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
-                  <div className="text-sm text-blue-700 dark:text-blue-300">
-                    <p className="font-medium mb-1">Next Steps:</p>
-                    <ul className="space-y-1 text-xs">
-                      <li>• Check your email inbox</li>
-                      <li>• Click the verification link</li>
-                      <li>• Return here to sign in</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-
-              {/* Resend Section */}
-              <div className="border-t border-zinc-300 dark:border-zinc-700 pt-4">
-                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-3">
-                  Didn't receive the email?
-                </p>
-
-                {resendMessage && (
-                  <div className={`mb-3 p-3 rounded-lg ${
-                    resendMessage.includes('successfully') || resendMessage.includes('sent')
-                      ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'
-                      : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
-                  }`}>
-                    <p className={`text-sm ${
-                      resendMessage.includes('successfully') || resendMessage.includes('sent')
-                        ? 'text-green-700 dark:text-green-300'
-                        : 'text-red-700 dark:text-red-300'
-                    }`}>
-                      {resendMessage}
-                    </p>
-                  </div>
-                )}
-
-                <button
-                  onClick={handleResendVerification}
-                  disabled={resendVerificationState?.loading}
-                  className="w-full py-2 rounded-md font-medium text-white 
-                           bg-gradient-to-r from-[#9668c2] to-[#7a4dc4] 
-                           hover:from-[#8557b3] hover:to-[#6b42b5] 
-                           disabled:opacity-50 disabled:cursor-not-allowed
-                           transition-all duration-200"
-                >
-                  {resendVerificationState?.loading ? (
-                    <div className="flex items-center gap-2 justify-center">
-                      <Loader2 size={16} className="animate-spin" />
-                      <span>Sending...</span>
-                    </div>
-                  ) : (
-                    "Resend Verification Email"
-                  )}
-                </button>
-              </div>
-
-              <div className="mt-6 pt-4 border-t border-zinc-300 dark:border-zinc-700">
-                <div className="flex flex-col gap-2">
-                  <button
-                    onClick={handleBackToForm}
-                    className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-[#9668c2] transition-colors"
-                  >
-                    ← Back to Registration
-                  </button>
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                    Already verified?{" "}
-                    <Link
-                      href="/login"
-                      className="text-[#9668c2] hover:underline cursor-pointer font-semibold"
-                    >
-                      Sign In
-                    </Link>
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </AuthLayout>
+      <EmailVerificationSuccess
+        email={formData.email}
+        onBackToForm={handleBackToForm}
+      />
     );
   }
 
+  // Render registration form
   return (
     <AuthLayout>
       <div className="w-full md:w-[25vw] p-[2px] rounded-lg md:bg-gradient-to-r from-[#FF6B6B] via-pink-500 to-violet-500">
         <div className="flex flex-col w-full h-full rounded-lg bg-zinc-200 dark:bg-zinc-900 md:p-[1vw]">
-          <h1 className="md:text-[2vw] text-[3.5vh] font-semibold text-center dark:text-zinc-200">
-            Create an account
-          </h1>
-
-          <p className="text-sm md:text-md text-zinc-600 dark:text-zinc-400 text-center mt-1">
-            Please fill in the form below
-          </p>
+          <header className="text-center mb-6">
+            <h1 className="md:text-[2vw] text-[3.5vh] font-semibold dark:text-zinc-200">
+              Create an account
+            </h1>
+            <p className="text-sm md:text-md text-zinc-600 dark:text-zinc-400 mt-1">
+              Please fill in the form below
+            </p>
+          </header>
 
           <form
             onSubmit={handleRegister}
             className="flex flex-col gap-3 mt-[2vh] md:mt-[2vw] px-[2vh] md:px-0"
+            noValidate
           >
-            <Input
-              label="Full Name"
-              type="text"
-              value={formData.fullName}
-              onChange={(e) => handleInputChange("fullName", e.target.value)}
-              required
-              disabled={registerState?.loading}
-              placeholder="Enter your full name"
-            />
+            {/* Full Name Field */}
+            <div>
+              <Input
+                label="Full Name"
+                type="text"
+                value={formData.fullName}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
+                  handleInputChange("fullName", e.target.value)
+                }
+                required
+                disabled={registerState?.loading}
+                placeholder="Enter your full name"
+                autoComplete="name"
+              />
+              {validationErrors.fullName && (
+                <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3 flex-shrink-0" />
+                  {validationErrors.fullName}
+                </p>
+              )}
+            </div>
 
-            <Input
-              label="Username"
-              type="text"
-              value={formData.username}
-              onChange={(e) => handleInputChange("username", e.target.value)}
-              required
-              disabled={registerState?.loading}
-              placeholder="Choose a username (min 3 characters)"
-            />
+            {/* Username Field */}
+            <div>
+              <Input
+                label="Username"
+                type="text"
+                value={formData.username}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
+                  handleInputChange("username", e.target.value)
+                }
+                required
+                disabled={registerState?.loading}
+                placeholder="Choose a username (min 3 characters)"
+                autoComplete="username"
+              />
+              {validationErrors.username && (
+                <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3 flex-shrink-0" />
+                  {validationErrors.username}
+                </p>
+              )}
+            </div>
 
-            <Input
-              label="Email"
-              type="email"
-              value={formData.email}
-              onChange={(e) => handleInputChange("email", e.target.value)}
-              required
-              disabled={registerState?.loading}
-              placeholder="Enter your email address"
-            />
+            {/* Email Field */}
+            <div>
+              <Input
+                label="Email"
+                type="email"
+                value={formData.email}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
+                  handleInputChange("email", e.target.value)
+                }
+                required
+                disabled={registerState?.loading}
+                placeholder="Enter your email address"
+                autoComplete="email"
+              />
+              {validationErrors.email && (
+                <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3 flex-shrink-0" />
+                  {validationErrors.email}
+                </p>
+              )}
+            </div>
 
-            <Input
-              label="Password"
-              type="password"
-              value={formData.password}
-              onChange={(e) => handleInputChange("password", e.target.value)}
-              required
-              disabled={registerState?.loading}
-              placeholder="Minimum 8 characters with uppercase, lowercase & number"
-            />
+            {/* Password Field */}
+            <div>
+              <Input
+                label="Password"
+                type="password"
+                value={formData.password}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
+                  handleInputChange("password", e.target.value)
+                }
+                required
+                disabled={registerState?.loading}
+                placeholder="Minimum 8 characters with uppercase, lowercase & number"
+                autoComplete="new-password"
+              />
+              {validationErrors.password && (
+                <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3 flex-shrink-0" />
+                  {validationErrors.password}
+                </p>
+              )}
+            </div>
 
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={registerState?.loading || !isFormValid()}
@@ -309,7 +311,7 @@ const RegisterForm = () => {
                        bg-gradient-to-r from-[#9668c2] to-[#7a4dc4] 
                        hover:from-[#8557b3] hover:to-[#6b42b5]
                        disabled:opacity-50 disabled:cursor-not-allowed
-                       transition-all duration-200"
+                       transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#9668c2] focus:ring-offset-2"
             >
               {registerState?.loading ? (
                 <div className="flex items-center gap-2 justify-center">
@@ -322,15 +324,17 @@ const RegisterForm = () => {
             </button>
           </form>
 
-          <p className="text-sm text-zinc-600 dark:text-zinc-400 text-center mt-5 select-none">
-            Already have an account?{" "}
-            <Link
-              href="/login"
-              className="text-[#9668c2] hover:underline cursor-pointer font-semibold"
-            >
-              Sign In
-            </Link>
-          </p>
+          <footer className="text-center mt-5">
+            <p className="text-sm text-zinc-600 dark:text-zinc-400 select-none">
+              Already have an account?{" "}
+              <Link
+                href="/login"
+                className="text-[#9668c2] hover:underline cursor-pointer font-semibold transition-colors"
+              >
+                Sign In
+              </Link>
+            </p>
+          </footer>
         </div>
       </div>
     </AuthLayout>

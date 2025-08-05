@@ -58,6 +58,23 @@ skeleton-shimmer {
   }
 }
 
+@keyframes gradientBorder {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+.animated-gradient-border {
+  background: linear-gradient(to right, #FF6B6B, #ec4899, #8b5cf6); /* pink-500 & violet-500 */
+  padding: 2px;
+  border-radius: 0.75rem; /* rounded-xl */
+  background-size: 200% 200%;
+  animation: gradientBorder 4s linear infinite;
+}
+
 /* ===================== Loader ===================== */
 
 @keyframes bounceDot {
@@ -89,6 +106,8 @@ skeleton-shimmer {
 .delay-300 {
   animation-delay: 0.3s;
 }
+
+
 
 /* =====================  Ripple ===================== */
 
