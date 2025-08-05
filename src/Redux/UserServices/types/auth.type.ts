@@ -128,6 +128,49 @@ export interface LoginResponse {
   };
 }
 
+export interface LogoutResponse {
+  status: string;
+  message: string;
+}
+
+
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ForgotPasswordResponse {
+  status: string;
+  message: string;
+}
+
+export interface ResetPasswordRequest {
+  password: string;
+  confirmPassword: string;
+}
+
+export interface ResetPasswordResponse {
+  status: string;
+  message: string;
+  data: {
+    user: User;
+    accessToken: string;
+  };
+}
+
+export interface CheckAuthResponse {
+  status: string;
+  data: {
+    user: User;
+  };
+}
+
+export interface RefreshTokenResponse {
+  status: string;
+  data: {
+    accessToken: string;
+  };
+}
+
 //// ====================== API Response Types ====================== //
 
 export interface ApiError {
@@ -179,5 +222,40 @@ export interface AuthState {
     error: string | null;
     success: boolean;
     message: string | null;
-  }
+  };
+
+  logout: {
+    loading: boolean;
+    error: string | null;
+    success: boolean;
+    message: string | null;
+  };
+
+    forgotPassword: {
+    loading: boolean;
+    error: string | null;
+    success: boolean;
+    message: string | null;
+  };
+  
+  resetPassword: {
+    loading: boolean;
+    error: string | null;
+    success: boolean;
+    message: string | null;
+  };
+  
+  checkAuth: {
+    loading: boolean;
+    error: string | null;
+    success: boolean;
+    message: string | null;
+  };
+  
+  refreshToken: {
+    loading: boolean;
+    error: string | null;
+    success: boolean;
+    message: string | null;
+  };
 }
