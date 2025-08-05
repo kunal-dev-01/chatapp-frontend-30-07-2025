@@ -47,7 +47,7 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
-    console.error('❌ Request error:', error);
+    console.log('❌ Request error:', error);
     return Promise.reject(error);
   }
 );
@@ -70,7 +70,7 @@ api.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config as any;
     
-    console.error('❌ Response error:', {
+    console.log('❌ Response error:', {
       status: error.response?.status,
       url: error.config?.url,
       message: error.message,
@@ -118,7 +118,7 @@ api.interceptors.response.use(
         return api(originalRequest);
         
       } catch (refreshError) {
-        console.error('❌ Token refresh failed:', refreshError);
+        console.log('❌ Token refresh failed:', refreshError);
         processQueue(refreshError, null);
         
         // Clear auth state and redirect to login

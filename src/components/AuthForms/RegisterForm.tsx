@@ -137,7 +137,7 @@ const RegisterForm: React.FC = () => {
         toast.success(result.message || "Registration successful! Please check your email.");
       }
     } catch (error) {
-      console.error("❌ Registration failed:", error);
+      console.log("❌ Registration failed:", error);
       // Error handling is done in useEffect
     }
   };

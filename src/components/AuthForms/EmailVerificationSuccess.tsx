@@ -56,7 +56,7 @@ const EmailVerificationSuccess: React.FC<EmailVerificationSuccessProps> = ({
         }, 10000);
       }
     } catch (error) {
-      console.error("❌ Resend failed:", error);
+      console.log("❌ Resend failed:", error);
 
       // Type-safe error handling
       let errorMessage = "Failed to resend verification email";
