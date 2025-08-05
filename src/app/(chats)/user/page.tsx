@@ -73,12 +73,12 @@ const Chats = () => {
           <ChatNavbar />
         </div>
 
-        <div className="flex items-center mt-2">
+        <div className="flex items-center md:mt-2 w-full md:w-[30vw]">
           <div className="">
             {tab === "chats" &&  <ChatUsers />}
           </div>
 
-          <div className="hidden md:block w-full">
+          <div className="hidden md:block">
             <ChatIndex />
           </div>
         </div>

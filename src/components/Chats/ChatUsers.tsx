@@ -16,7 +16,7 @@ const ChatUserSearch = dynamic(() => import('@/components/Chats/ChatUserSearch')
 
 const ChatUsers = () => {
   return (
-    <div className='w-full md:w-[30vw] h-screen md:h-[75vh] rounded-l-xl md:p-[1vw] p-[1vh] bg-zinc-100'>
+    <div className='w-[100vw] md:w-[30vw] h-screen md:h-[75vh] rounded-l-xl md:p-[1vw] p-[1vh] bg-zinc-100'>
         <div className="w-full md:w-[30vw]">
             <ChatUserSearch />
         </div>
