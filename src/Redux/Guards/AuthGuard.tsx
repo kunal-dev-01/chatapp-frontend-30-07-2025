@@ -9,19 +9,28 @@ interface AuthGuardProps {
 
 const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const dispatch = useAppDispatch();
-  const { isInitialized, accessToken } = useAppSelector((state) => state.auth);
+  const { 
+    isInitialized, 
+    accessToken, 
+    isCheckingAuth,
+  } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
     const initAuth = async () => {
+      console.log('🔍 AuthGuard: Initializing auth check...');
+      console.log('🔍 AuthGuard: Access token exists:', !!accessToken);
+      console.log('🔍 AuthGuard: Is initialized:', isInitialized);
+
       if (accessToken && !isInitialized) {
         try {
+          console.log('🔍 AuthGuard: Dispatching checkAuth...');
           await dispatch(checkAuth()).unwrap();
+          console.log('✅ AuthGuard: Auth check successful');
         } catch (error) {
-          console.error('Auth check failed:', error);
-        } finally {
-          dispatch(setInitialized());
+          console.error('❌ AuthGuard: Auth check failed:', error);
         }
-      } else {
+      } else if (!accessToken && !isInitialized) {
+        console.log('🔍 AuthGuard: No token, setting initialized');
         dispatch(setInitialized());
       }
     };
@@ -29,10 +38,22 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     initAuth();
   }, [dispatch, accessToken, isInitialized]);
 
-  if (!isInitialized) {
-    return <Loader />;
+  // Show loader while checking auth or not initialized
+  if (!isInitialized || isCheckingAuth) {
+    console.log('🔄 AuthGuard: Showing loader', { isInitialized, isCheckingAuth });
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <Loader />
+          <p className="mt-4 text-sm text-gray-600">
+            Initializing application...
+          </p>
+        </div>
+      </div>
+    );
   }
 
+  console.log('✅ AuthGuard: Rendering children');
   return <>{children}</>;
 };
 

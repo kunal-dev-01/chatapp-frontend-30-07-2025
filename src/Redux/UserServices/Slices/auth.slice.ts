@@ -5,7 +5,7 @@ import {
   LoginCredentials,
   RegisterCredentials,
 } from "../types/auth.type";
-import api from "@/utils/app"; // Fixed import path
+import api from "@/utils/app";
 import { AxiosError } from "axios";
 
 const initialState: AuthState = {
@@ -34,53 +34,53 @@ const initialState: AuthState = {
   isInitialized: false,
 };
 
-// Async thunks with better error handling
+// Helper function to extract error message
+const extractErrorMessage = (error: unknown): string => {
+  if (error instanceof AxiosError) {
+    return (
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      error.message ||
+      "An error occurred"
+    );
+  }
+  return "Network error occurred";
+};
+
+// Login User
 export const loginUser = createAsyncThunk(
   "auth/login",
   async (credentials: LoginCredentials, { rejectWithValue }) => {
     try {
       console.log("🔐 Attempting login...");
       const response = await api.post("/auth/login", credentials);
-      console.log("✅ Login successful");
+      console.log("✅ Login successful", response.data);
       return response.data.data;
     } catch (error) {
       console.error("❌ Login error:", error);
-      if (error instanceof AxiosError) {
-        const message =
-          error.response?.data?.message ||
-          error.response?.data?.error ||
-          error.message ||
-          "Login failed";
-        return rejectWithValue(message);
-      }
-      return rejectWithValue("Network error occurred");
+      return rejectWithValue(extractErrorMessage(error));
     }
   }
 );
 
+// Register User
 export const registerUser = createAsyncThunk(
   "auth/register",
   async (credentials: RegisterCredentials, { rejectWithValue }) => {
     try {
       console.log("📝 Attempting registration...");
       const response = await api.post("/auth/register", credentials);
-      console.log("✅ Registration successful");
-      return response.data;
+      console.log("✅ Registration successful", response.data);
+      // Return the user data from response
+      return response.data.data;
     } catch (error) {
       console.error("❌ Registration error:", error);
-      if (error instanceof AxiosError) {
-        const message =
-          error.response?.data?.message ||
-          error.response?.data?.error ||
-          error.message ||
-          "Registration failed";
-        return rejectWithValue(message);
-      }
-      return rejectWithValue("Network error occurred");
+      return rejectWithValue(extractErrorMessage(error));
     }
   }
 );
 
+// Check Auth
 export const checkAuth = createAsyncThunk(
   "auth/checkAuth",
   async (_, { rejectWithValue, getState }) => {
@@ -94,22 +94,16 @@ export const checkAuth = createAsyncThunk(
       }
 
       const response = await api.get("/auth/check-auth");
-      console.log("✅ Auth check successful");
+      console.log("✅ Auth check successful", response.data);
       return response.data.data;
     } catch (error) {
       console.error("❌ Auth check error:", error);
-      if (error instanceof AxiosError) {
-        const message =
-          error.response?.data?.message ||
-          error.response?.data?.error ||
-          "Auth check failed";
-        return rejectWithValue(message);
-      }
-      return rejectWithValue("Network error occurred");
+      return rejectWithValue(extractErrorMessage(error));
     }
   }
 );
 
+// Logout User
 export const logoutUser = createAsyncThunk(
   "auth/logout",
   async (_, { rejectWithValue }) => {
@@ -126,72 +120,55 @@ export const logoutUser = createAsyncThunk(
   }
 );
 
+// Verify Email
 export const verifyEmail = createAsyncThunk(
   "auth/verifyEmail",
   async (token: string, { rejectWithValue }) => {
     try {
       console.log("📧 Verifying email...");
       const response = await api.get(`/auth/verify-email/${token}`);
-      console.log("✅ Email verification successful");
-      return response.data;
+      console.log("✅ Email verification successful", response.data);
+      return response.data.data;
     } catch (error) {
       console.error("❌ Email verification error:", error);
-      if (error instanceof AxiosError) {
-        const message =
-          error.response?.data?.message ||
-          error.response?.data?.error ||
-          "Verification failed";
-        return rejectWithValue(message);
-      }
-      return rejectWithValue("Network error occurred");
+      return rejectWithValue(extractErrorMessage(error));
     }
   }
 );
 
+// Resend Verification Email
 export const resendVerificationEmail = createAsyncThunk(
   "auth/resendVerification",
   async (email: string, { rejectWithValue }) => {
     try {
       console.log("📧 Resending verification email...");
       const response = await api.post("/auth/resend-verification", { email });
-      console.log("✅ Verification email sent");
+      console.log("✅ Verification email sent", response.data);
       return response.data;
     } catch (error) {
       console.error("❌ Resend verification error:", error);
-      if (error instanceof AxiosError) {
-        const message =
-          error.response?.data?.message ||
-          error.response?.data?.error ||
-          "Resend failed";
-        return rejectWithValue(message);
-      }
-      return rejectWithValue("Network error occurred");
+      return rejectWithValue(extractErrorMessage(error));
     }
   }
 );
 
+// Forgot Password
 export const forgotPassword = createAsyncThunk(
   "auth/forgotPassword",
   async (email: string, { rejectWithValue }) => {
     try {
       console.log("🔑 Requesting password reset...");
       const response = await api.post("/auth/forgot-password", { email });
-      console.log("✅ Password reset email sent");
+      console.log("✅ Password reset email sent", response.data);
       return response.data;
     } catch (error) {
       console.error("❌ Forgot password error:", error);
-      if (error instanceof AxiosError) {
-        const message =
-          error.response?.data?.message ||
-          error.response?.data?.error ||
-          "Password reset failed";
-        return rejectWithValue(message);
-      }
-      return rejectWithValue("Network error occurred");
+      return rejectWithValue(extractErrorMessage(error));
     }
   }
 );
 
+// Reset Password
 export const resetPassword = createAsyncThunk(
   "auth/resetPassword",
   async (
@@ -208,23 +185,16 @@ export const resetPassword = createAsyncThunk(
         password,
         confirmPassword,
       });
-      console.log("✅ Password reset successful");
+      console.log("✅ Password reset successful", response.data);
       return response.data.data;
     } catch (error) {
       console.error("❌ Password reset error:", error);
-      if (error instanceof AxiosError) {
-        const message =
-          error.response?.data?.message ||
-          error.response?.data?.error ||
-          "Password reset failed";
-        return rejectWithValue(message);
-      }
-      return rejectWithValue("Network error occurred");
+      return rejectWithValue(extractErrorMessage(error));
     }
   }
 );
 
-// Auth slice - same as before, no changes needed
+// Auth Slice
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -250,6 +220,9 @@ const authSlice = createSlice({
     clearResetPasswordError: (state) => {
       state.isResettingPasswordError = null;
     },
+    clearCheckAuthError: (state) => {
+      state.isCheckingAuthError = null;
+    },
     refreshTokenSuccess: (state, action: PayloadAction<string>) => {
       state.accessToken = action.payload;
     },
@@ -269,7 +242,7 @@ const authSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    // Login
+    // Login Cases
     builder
       .addCase(loginUser.pending, (state) => {
         state.isLoggingIn = true;
@@ -290,14 +263,18 @@ const authSlice = createSlice({
         state.isLoginError = action.payload as string;
       });
 
-    // Register
+    // Register Cases - FIXED
     builder
       .addCase(registerUser.pending, (state) => {
         state.isRegistering = true;
         state.isRegisteredError = null;
       })
-      .addCase(registerUser.fulfilled, (state) => {
+      .addCase(registerUser.fulfilled, (state, action) => {
         state.isRegistering = false;
+        // Store user data but don't set as authenticated until email is verified
+        if (action.payload?.user) {
+          state.user = action.payload.user;
+        }
         state.isRegisteredError = null;
       })
       .addCase(registerUser.rejected, (state, action) => {
@@ -305,10 +282,11 @@ const authSlice = createSlice({
         state.isRegisteredError = action.payload as string;
       });
 
-    // Check Auth
+    // Check Auth Cases
     builder
       .addCase(checkAuth.pending, (state) => {
         state.isCheckingAuth = true;
+        state.isCheckingAuthError = null;
       })
       .addCase(checkAuth.fulfilled, (state, action) => {
         state.isCheckingAuth = false;
@@ -317,19 +295,20 @@ const authSlice = createSlice({
         state.isCheckingAuthError = null;
         state.isInitialized = true;
       })
-      .addCase(checkAuth.rejected, (state) => {
+      .addCase(checkAuth.rejected, (state, action) => {
         state.isCheckingAuth = false;
         state.user = null;
         state.accessToken = null;
         state.isAuthenticated = false;
-        state.isCheckingAuthError = null;
+        state.isCheckingAuthError = action.payload as string;
         state.isInitialized = true;
       });
 
-    // Logout
+    // Logout Cases
     builder
       .addCase(logoutUser.pending, (state) => {
         state.isLogoutting = true;
+        state.isLogoutError = null;
       })
       .addCase(logoutUser.fulfilled, (state) => {
         state.isLogoutting = false;
@@ -338,23 +317,27 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
         state.isLogoutError = null;
       })
-      .addCase(logoutUser.rejected, (state) => {
+      .addCase(logoutUser.rejected, (state, action) => {
         state.isLogoutting = false;
+        // Even if logout fails, clear the state
         state.user = null;
         state.accessToken = null;
         state.isAuthenticated = false;
-        state.isLogoutError = null;
+        state.isLogoutError = action.payload as string;
       });
 
-    // Other cases remain the same...
-    // Verify Email
+    // Verify Email Cases
     builder
       .addCase(verifyEmail.pending, (state) => {
         state.isVerifyingEmail = true;
         state.isVerifyingEmailError = null;
       })
-      .addCase(verifyEmail.fulfilled, (state) => {
+      .addCase(verifyEmail.fulfilled, (state, action) => {
         state.isVerifyingEmail = false;
+        // Update user with verified email status
+        if (action.payload?.user) {
+          state.user = { ...state.user, ...action.payload.user };
+        }
         state.isVerifyingEmailError = null;
       })
       .addCase(verifyEmail.rejected, (state, action) => {
@@ -362,7 +345,37 @@ const authSlice = createSlice({
         state.isVerifyingEmailError = action.payload as string;
       });
 
-    // Reset Password
+    // Resend Verification Email Cases
+    builder
+      .addCase(resendVerificationEmail.pending, (state) => {
+        state.isResendingVerificationEmail = true;
+        state.isResendingVerificationEmailError = null;
+      })
+      .addCase(resendVerificationEmail.fulfilled, (state) => {
+        state.isResendingVerificationEmail = false;
+        state.isResendingVerificationEmailError = null;
+      })
+      .addCase(resendVerificationEmail.rejected, (state, action) => {
+        state.isResendingVerificationEmail = false;
+        state.isResendingVerificationEmailError = action.payload as string;
+      });
+
+    // Forgot Password Cases
+    builder
+      .addCase(forgotPassword.pending, (state) => {
+        state.isForgotPassword = true;
+        state.isForgotPasswordError = null;
+      })
+      .addCase(forgotPassword.fulfilled, (state) => {
+        state.isForgotPassword = false;
+        state.isForgotPasswordError = null;
+      })
+      .addCase(forgotPassword.rejected, (state, action) => {
+        state.isForgotPassword = false;
+        state.isForgotPasswordError = action.payload as string;
+      });
+
+    // Reset Password Cases
     builder
       .addCase(resetPassword.pending, (state) => {
         state.isResettingPassword = true;
@@ -378,34 +391,6 @@ const authSlice = createSlice({
       .addCase(resetPassword.rejected, (state, action) => {
         state.isResettingPassword = false;
         state.isResettingPasswordError = action.payload as string;
-      })
-
-      // Forgot Password
-      .addCase(forgotPassword.pending, (state) => {
-        state.isForgotPassword = true;
-        state.isForgotPasswordError = null;
-      })
-      .addCase(forgotPassword.fulfilled, (state) => {
-        state.isForgotPassword = false;
-        state.isForgotPasswordError = null;
-      })
-      .addCase(forgotPassword.rejected, (state, action) => {
-        state.isForgotPassword = false;
-        state.isForgotPasswordError = action.payload as string;
-      })
-
-      // Resend Verification Email
-      .addCase(resendVerificationEmail.pending, (state) => {
-        state.isResendingVerificationEmail = true;
-        state.isResendingVerificationEmailError = null;
-      })
-      .addCase(resendVerificationEmail.fulfilled, (state) => {
-        state.isResendingVerificationEmail = false;
-        state.isResendingVerificationEmailError = null;
-      })
-      .addCase(resendVerificationEmail.rejected, (state, action) => {
-        state.isResendingVerificationEmail = false;
-        state.isResendingVerificationEmailError = action.payload as string;
       });
   },
 });
@@ -422,6 +407,7 @@ export const {
   clearVerifyEmailError,
   clearResendVerificationEmailError,
   clearForgotPasswordError,
+  clearCheckAuthError,
 } = authSlice.actions;
 
 export default authSlice.reducer;
