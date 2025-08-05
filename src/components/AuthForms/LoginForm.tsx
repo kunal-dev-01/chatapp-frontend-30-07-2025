@@ -1,18 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import AuthLayout from "../Layouts/AuthLayout";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
+
 import { useAppDispatch, useAppSelector } from "@/Redux/Hooks/reduxHook";
 import {
   loginUser,
   clearLoginState,
 } from "@/Redux/UserServices/Slices/auth.slice";
-import { toast } from "react-hot-toast";
 
+// Dynamic Input
 const Input = dynamic(() => import("@/components/Layouts/AuthInput"), {
   ssr: false,
+  loading: () => <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />,
 });
 
 interface FormData {
@@ -20,84 +23,102 @@ interface FormData {
   password: string;
 }
 
+interface ValidationErrors {
+  [key: string]: string;
+}
+
 const LoginForm = () => {
-  const router = useRouter();
   const dispatch = useAppDispatch();
-  
-  // Get auth state from Redux
-  const { 
-    login,
-    isAuthenticated 
-  } = useAppSelector((state) => state.auth);
+  const router = useRouter();
+
+  const { login, isAuthenticated } = useAppSelector((state) => state.auth);
 
   const [formData, setFormData] = useState<FormData>({
     identifier: "",
     password: "",
   });
 
-  const handleInputChange = (field: keyof FormData, value: string): void => {
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
+
+  // Validation
+  const validateForm = (): boolean => {
+    const errors: ValidationErrors = {};
+
+    if (!formData.identifier.trim()) {
+      errors.identifier = "Email or username is required";
+    }
+
+    if (!formData.password.trim()) {
+      errors.password = "Password is required";
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const isFormValid = (): boolean => {
+    return (
+      formData.identifier.trim().length > 0 &&
+      formData.password.trim().length > 0 &&
+      Object.keys(validationErrors).length === 0
+    );
+  };
+
+  const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
+
+    if (validationErrors[field]) {
+      setValidationErrors((prev) => ({
+        ...prev,
+        [field]: "",
+      }));
+    }
   };
 
-  const handleLogin = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!formData.identifier.trim() || !formData.password.trim()) {
-      toast.error("Please fill in all fields");
-      return;
-    }
+    if (!validateForm()) return;
 
     try {
       await dispatch(loginUser(formData)).unwrap();
-      // Success will be handled by useEffect
+      toast.success("Login successful!", {
+        duration: 3000
+      });
+      setFormData({ identifier: "", password: "" });
+      setValidationErrors({});
+      router.push("/user/?tab=chats");
     } catch (error) {
-      // Error is already handled by Redux slice and will be shown in useEffect
-      console.error("Login failed:", error);
+      console.log("Login failed:", error);
+      // handled by useEffect
     }
   };
 
-  // Handle successful login
-  useEffect(() => {
-    if (login?.success) {
-      toast.success("Login successful! Redirecting...", {
-        duration: 2000,
-      });
-      
-      // Clear the login state after success
-      dispatch(clearLoginState());
-      
-      // Redirect to dashboard
-      router.push("/user/?tab=chats");
-    }
-  }, [login?.success, router, dispatch]);
-
-  // Handle login errors
-  useEffect(() => {
-    if (login?.error) {
-      toast.error(login?.error, {
-        duration: 4000,
-      });
-      
-      // Clear error after showing toast
-      setTimeout(() => {
-        dispatch(clearLoginState());
-      }, 100);
-    }
-  }, [login?.error, dispatch]);
-
-  // Redirect if already authenticated
+  // Auto redirect if already logged in
   useEffect(() => {
     if (isAuthenticated) {
       router.push("/user/?tab=chats");
     }
   }, [isAuthenticated, router]);
 
-  const isFormValid = (): boolean => {
-    return Boolean(formData.identifier.trim() && formData.password.trim());
-  };
+  // Error feedback
+  useEffect(() => {
+    if (login?.error) {
+      toast.error(login?.error, {
+        duration: 4000,
+        icon: <AlertCircle className="w-5 h-5" />,
+      });
+
+      const timer = setTimeout(() => {
+        dispatch(clearLoginState());
+      }, 100);
+
+      return () => clearTimeout(timer);
+    }
+  }, [login?.error, dispatch]);
 
   return (
     <AuthLayout>
@@ -115,27 +136,47 @@ const LoginForm = () => {
             onSubmit={handleLogin}
             className="flex flex-col gap-3 mt-[2vh] md:mt-[2vw] px-[2vh] md:px-0"
           >
-            <Input
-              label="Email or Username"
-              type="text"
-              value={formData.identifier}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                handleInputChange("identifier", e.target.value)
-              }
-              required
-              disabled={login?.loading}
-            />
-            
-            <Input
-              label="Password"
-              type="password"
-              value={formData.password}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                handleInputChange("password", e.target.value)
-              }
-              required
-              disabled={login?.loading}
-            />
+            {/* Identifier Field */}
+            <div>
+              <Input
+                label="Email or Username"
+                type="text"
+                value={formData.identifier}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  handleInputChange("identifier", e.target.value)
+                }
+                required
+                disabled={login?.loading}
+                autoComplete="username"
+              />
+              {validationErrors.identifier && (
+                <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3" />
+                  {validationErrors.identifier}
+                </p>
+              )}
+            </div>
+
+            {/* Password Field */}
+            <div>
+              <Input
+                label="Password"
+                type="password"
+                value={formData.password}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  handleInputChange("password", e.target.value)
+                }
+                required
+                disabled={login?.loading}
+                autoComplete="current-password"
+              />
+              {validationErrors.password && (
+                <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3" />
+                  {validationErrors.password}
+                </p>
+              )}
+            </div>
 
             <Link href="/forgot-password" className="select-none">
               <p className="text-sm text-zinc-600 dark:text-zinc-400 cursor-pointer pl-2 hover:underline">
@@ -147,10 +188,10 @@ const LoginForm = () => {
               type="submit"
               disabled={login?.loading || !isFormValid()}
               className="w-full py-2 mt-3 rounded-md font-medium text-white 
-                       bg-gradient-to-r from-[#9668c2] to-[#7a4dc4] 
-                       hover:from-[#8557b3] hover:to-[#6b42b5]
-                       disabled:opacity-50 disabled:cursor-not-allowed
-                       transition-all duration-200"
+                         bg-gradient-to-r from-[#9668c2] to-[#7a4dc4] 
+                         hover:from-[#8557b3] hover:to-[#6b42b5]
+                         disabled:opacity-50 disabled:cursor-not-allowed
+                         transition-all duration-200"
             >
               {login?.loading ? (
                 <div className="flex items-center gap-2 justify-center">

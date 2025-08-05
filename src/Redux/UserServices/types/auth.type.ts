@@ -1,3 +1,5 @@
+// ====================== User Types ====================== //
+
 export interface User {
   id: string;
   username: string;
@@ -78,7 +80,7 @@ export interface User {
   
 }
 
-
+/// ====================== Auth Types ====================== //
 export interface RegisterRequest {
   username: string;
   email: string;
@@ -112,42 +114,21 @@ export interface ResendVerificationResponse {
 }
 
 
-// Login
 export interface LoginRequest {
-  identifier: string; // email or username
+  identifier: string;
   password: string;
 }
 
-export interface LoginResponse extends ApiResponse<{
-  user: User;
-  accessToken: string;
-}> {}
-
-// Forgot Password
-export interface ForgotPasswordRequest {
-  email: string;
+export interface LoginResponse {
+  status: string;
+  message: string;
+  data: {
+    user: User;
+    accessToken: string;
+  };
 }
 
-export interface ForgotPasswordResponse extends ApiResponse {}
-
-// Reset Password
-export interface ResetPasswordRequest {
-  password: string;
-  confirmPassword: string;
-}
-
-export interface ResetPasswordResponse extends ApiResponse<{
-  user: User;
-  accessToken: string;
-}> {}
-
-// Check Auth
-export interface CheckAuthResponse extends ApiResponse<{ user: User }> {}
-
-// Refresh Token
-export interface RefreshTokenResponse extends ApiResponse<{
-  accessToken: string;
-}> {}
+//// ====================== API Response Types ====================== //
 
 export interface ApiError {
   message: string;
@@ -161,26 +142,42 @@ export interface ApiResponse<T = any> {
   data?: T;
 }
 
-export interface AsyncState {
-  loading: boolean;
-  error: string | null;
-  success: boolean;
-  message: string | null;
-}
+/// ====================== Auth State ====================== //
 
 export interface AuthState {
+  // User data
   user: User | null;
   accessToken: string | null;
   isAuthenticated: boolean;
   
-  // Async states
-  register: AsyncState;
-  login: AsyncState;
-  logout: AsyncState;
-  verifyEmail: AsyncState;
-  resendVerification: AsyncState;
-  forgotPassword: AsyncState;
-  resetPassword: AsyncState;
-  checkAuth: AsyncState;
-  refreshToken: AsyncState;
+  // Register states
+  register: {
+    loading: boolean;
+    error: string | null;
+    success: boolean;
+    message: string | null;
+  };
+  
+  // Verify email states
+  verifyEmail: {
+    loading: boolean;
+    error: string | null;
+    success: boolean;
+    message: string | null;
+  };
+  
+  // Resend verification states
+  resendVerification: {
+    loading: boolean;
+    error: string | null;
+    success: boolean;
+    message: string | null;
+  };
+
+  login:{
+    loading: boolean;
+    error: string | null;
+    success: boolean;
+    message: string | null;
+  }
 }

@@ -4,6 +4,8 @@ import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import Skeleton from "@/components/Layouts/Skeleton";
 
+import { useAppSelector } from "@/Redux/Hooks/reduxHook";
+
 const ChatNavigate = dynamic(() => import("@/components/Chats/ChatNavigate"), {
   ssr: false,
   loading: () => (
@@ -58,6 +60,11 @@ const ChatUsers = dynamic(() => import("@/components/Chats/ChatUsers"), {
 const Chats = () => {
   const searchParams = useSearchParams();
   const tab = searchParams.get("tab");
+
+  const {accessToken } = useAppSelector((state) => state.auth);
+
+  console.log(accessToken)
+
 
   return (
     <div className="w-full h-screen md:p-3">
