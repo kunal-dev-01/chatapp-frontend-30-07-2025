@@ -218,7 +218,7 @@ export const loginUser = createAsyncThunk<
   { rejectValue: ApiError }
 >("auth/login", async (loginData, { rejectWithValue }) => {
   try {
-    console.log("🚀 Sending login request:", { identifier: loginData.identifier });
+
     const response = await api.post<LoginResponse>("/auth/login", loginData);
     console.log("✅ Login response:", response.data);
     return response.data;
@@ -525,10 +525,6 @@ const authSlice = createSlice({
         state.register.error = action.payload?.message || "Registration failed";
         state.register.success = false;
         state.register.message = null;
-
-        if (action.payload?.errors) {
-          console.log("🔍 Validation errors:", action.payload.errors);
-        }
       });
 
     // Login user

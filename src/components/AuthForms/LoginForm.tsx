@@ -20,13 +20,13 @@ interface FormData {
   password: string;
 }
 
-const LoginForm: React.FC = () => {
+const LoginForm = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
   
   // Get auth state from Redux
   const { 
-    login: { loading: isLoading, error: loginError, success: loginSuccess },
+    login,
     isAuthenticated 
   } = useAppSelector((state) => state.auth);
 
@@ -61,7 +61,7 @@ const LoginForm: React.FC = () => {
 
   // Handle successful login
   useEffect(() => {
-    if (loginSuccess) {
+    if (login?.success) {
       toast.success("Login successful! Redirecting...", {
         duration: 2000,
       });
@@ -72,12 +72,12 @@ const LoginForm: React.FC = () => {
       // Redirect to dashboard
       router.push("/user/?tab=chats");
     }
-  }, [loginSuccess, router, dispatch]);
+  }, [login?.success, router, dispatch]);
 
   // Handle login errors
   useEffect(() => {
-    if (loginError) {
-      toast.error(loginError, {
+    if (login?.error) {
+      toast.error(login?.error, {
         duration: 4000,
       });
       
@@ -86,7 +86,7 @@ const LoginForm: React.FC = () => {
         dispatch(clearLoginState());
       }, 100);
     }
-  }, [loginError, dispatch]);
+  }, [login?.error, dispatch]);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -123,7 +123,7 @@ const LoginForm: React.FC = () => {
                 handleInputChange("identifier", e.target.value)
               }
               required
-              disabled={isLoading}
+              disabled={login?.loading}
             />
             
             <Input
@@ -134,7 +134,7 @@ const LoginForm: React.FC = () => {
                 handleInputChange("password", e.target.value)
               }
               required
-              disabled={isLoading}
+              disabled={login?.loading}
             />
 
             <Link href="/forgot-password" className="select-none">
@@ -145,14 +145,14 @@ const LoginForm: React.FC = () => {
 
             <button
               type="submit"
-              disabled={isLoading || !isFormValid()}
+              disabled={login?.loading || !isFormValid()}
               className="w-full py-2 mt-3 rounded-md font-medium text-white 
                        bg-gradient-to-r from-[#9668c2] to-[#7a4dc4] 
                        hover:from-[#8557b3] hover:to-[#6b42b5]
                        disabled:opacity-50 disabled:cursor-not-allowed
                        transition-all duration-200"
             >
-              {isLoading ? (
+              {login?.loading ? (
                 <div className="flex items-center gap-2 justify-center">
                   <Loader2 size={20} className="animate-spin" />
                   <span>Signing In...</span>
