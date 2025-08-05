@@ -1,24 +1,29 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import AuthLayout from "../Layouts/AuthLayout";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { Loader2, Mail, CheckCircle} from "lucide-react";
+import { Loader2, Mail, CheckCircle } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/Redux/Hooks/reduxHook";
-import { registerUser, resendVerificationEmail,clearRegiterError,clearResendVerificationEmailError } from "@/Redux/UserServices/Slices/auth.slice";
+import {
+  registerUser,
+  resendVerificationEmail,
+  clearRegiterError,
+  clearResendVerificationEmailError,
+} from "@/Redux/UserServices/Slices/auth.slice";
+import { toast } from "react-hot-toast";
 
 const Input = dynamic(() => import("@/components/Layouts/AuthInput"), {
   ssr: false,
 });
 
-const ErrorAlert = dynamic(() => import("../Common/ErrorAlert"), {
-  ssr: false,
-});
-
-
-
 const RegisterForm = () => {
   const dispatch = useAppDispatch();
-  const { isRegistering, isRegisteredError,isResendingVerificationEmailError,isResendingVerificationEmail } = useAppSelector((state) => state.auth);
+  const {
+    isRegistering,
+    isRegisteredError,
+    isResendingVerificationEmailError,
+    isResendingVerificationEmail,
+  } = useAppSelector((state) => state.auth);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -27,40 +32,45 @@ const RegisterForm = () => {
     password: "",
   });
 
-  const [registrationStep, setRegistrationStep] = useState<'form' | 'success'>('form');
+  const [registrationStep, setRegistrationStep] = useState<"form" | "success">(
+    "form"
+  );
   const [resendMessage, setResendMessage] = useState("");
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
   const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
+
     try {
       const result = await dispatch(registerUser(formData)).unwrap();
-      
-      if (result.status === 'success') {
-        setRegistrationStep('success');
+
+      if (result.status === "success") {
+        setRegistrationStep("success");
       }
     } catch (error) {
       // Error handling is done by Redux
-      console.error('Registration failed:', error);
+      console.error("Registration failed:", error);
     }
   };
 
   const handleResendVerification = async () => {
-
     setResendMessage("");
 
     try {
-      const result = await dispatch(resendVerificationEmail(formData.email)).unwrap();
-      
-      if (result.status === 'success') {
-        setResendMessage("Verification email sent successfully! Please check your inbox.");
+      const result = await dispatch(
+        resendVerificationEmail(formData.email)
+      ).unwrap();
+
+      if (result.status === "success") {
+        setResendMessage(
+          "Verification email sent successfully! Please check your inbox."
+        );
       }
     } catch (error: any) {
       setResendMessage(error || "Failed to resend verification email");
@@ -70,13 +80,25 @@ const RegisterForm = () => {
   };
 
   const isFormValid = () => {
-    return formData.fullName.trim() && 
-           formData.username.trim() && 
-           formData.email.trim() && 
-           formData.password.trim();
+    return (
+      formData.fullName.trim() &&
+      formData.username.trim() &&
+      formData.email.trim() &&
+      formData.password.trim()
+    );
   };
 
-  if (registrationStep === 'success') {
+  useEffect(() => {
+    if (typeof isRegisteredError === "string" || typeof isResendingVerificationEmailError === "string") {
+      toast.error(isRegisteredError || isResendingVerificationEmailError, {
+        duration: 4000,
+      });
+      dispatch(clearRegiterError());
+      dispatch(clearResendVerificationEmailError()); 
+    }
+  }, [isRegisteredError, isResendingVerificationEmailError, dispatch]);
+
+  if (registrationStep === "success") {
     return (
       <AuthLayout>
         <div className="w-full md:w-[30vw] p-[2px] rounded-lg md:bg-gradient-to-r from-[#FF6B6B] via-pink-500 to-violet-500">
@@ -85,14 +107,16 @@ const RegisterForm = () => {
               <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mb-4">
                 <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
               </div>
-              
+
               <h1 className="md:text-[2vw] text-[3.5vh] font-semibold dark:text-zinc-200 mb-2">
                 Check Your Email!
               </h1>
-              
+
               <p className="text-sm md:text-md text-zinc-600 dark:text-zinc-400 mb-6">
                 We've sent a verification link to <br />
-                <span className="font-semibold text-[#9668c2]">{formData.email}</span>
+                <span className="font-semibold text-[#9668c2]">
+                  {formData.email}
+                </span>
               </p>
 
               <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
@@ -114,7 +138,7 @@ const RegisterForm = () => {
                 <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-3">
                   Didn't receive the email?
                 </p>
-                
+
                 {resendMessage && (
                   <div className="mb-3 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
                     <p className="text-sm text-green-700 dark:text-green-300">
@@ -123,14 +147,6 @@ const RegisterForm = () => {
                   </div>
                 )}
 
-                {isResendingVerificationEmailError && (
-                  <ErrorAlert
-                    error={isResendingVerificationEmailError}
-                    onClear={() => dispatch(clearResendVerificationEmailError())}
-                    autoClose={false}
-                    className="mb-3"
-                  />
-                )}
 
                 <button
                   onClick={handleResendVerification}
@@ -170,6 +186,7 @@ const RegisterForm = () => {
     );
   }
 
+
   return (
     <AuthLayout>
       <div className="w-full md:w-[25vw] p-[2px] rounded-lg md:bg-gradient-to-r from-[#FF6B6B] via-pink-500 to-violet-500">
@@ -182,14 +199,6 @@ const RegisterForm = () => {
             Please fill in the form below
           </p>
 
-          {isRegisteredError && (
-            <ErrorAlert
-              error={isRegisteredError}
-              onClear={() => dispatch(clearRegiterError())}
-              autoClose={false}
-              className="mt-4 mx-[2vh] md:mx-0"
-            />
-          )}
 
           <form
             onSubmit={handleRegister}
@@ -199,7 +208,7 @@ const RegisterForm = () => {
               label="Full Name"
               type="text"
               value={formData.fullName}
-              onChange={(e) => handleInputChange('fullName', e.target.value)}
+              onChange={(e) => handleInputChange("fullName", e.target.value)}
               required
             />
 
@@ -207,7 +216,7 @@ const RegisterForm = () => {
               label="Username"
               type="text"
               value={formData.username}
-              onChange={(e) => handleInputChange('username', e.target.value)}
+              onChange={(e) => handleInputChange("username", e.target.value)}
               required
             />
 
@@ -215,15 +224,15 @@ const RegisterForm = () => {
               label="Email"
               type="email"
               value={formData.email}
-              onChange={(e) => handleInputChange('email', e.target.value)}
+              onChange={(e) => handleInputChange("email", e.target.value)}
               required
             />
-            
+
             <Input
               label="Password"
               type="password"
               value={formData.password}
-              onChange={(e) => handleInputChange('password', e.target.value)}
+              onChange={(e) => handleInputChange("password", e.target.value)}
               required
             />
 

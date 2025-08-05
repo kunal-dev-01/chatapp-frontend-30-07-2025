@@ -10,9 +10,6 @@ interface VerifyFormProps {
   token?: string;
 }
 
-const ErrorAlert = dynamic(() => import("../Common/ErrorAlert"), {
-  ssr: false,
-});
 
 const VerifyForm: React.FC<VerifyFormProps> = ({ token }) => {
   const dispatch = useAppDispatch();

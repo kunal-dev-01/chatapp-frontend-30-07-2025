@@ -6,12 +6,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/Redux/Hooks/reduxHook";
 import { resetPassword, clearResetPasswordError } from "@/Redux/UserServices/Slices/auth.slice";
+import { toast } from "react-hot-toast";
 
 const Input = dynamic(() => import("@/components/Layouts/AuthInput"), {
-  ssr: false,
-});
-
-const ErrorAlert = dynamic(() => import("../Common/ErrorAlert"), {
   ssr: false,
 });
 
@@ -117,6 +114,15 @@ const ResetForm: React.FC<ResetFormProps> = ({ token }) => {
            formData.password.length >= 8;
   };
 
+    useEffect(() => {
+    if (typeof isResettingPasswordError === "string") {
+      toast.error(isResettingPasswordError , {
+        duration: 4000,
+      });
+      dispatch(clearResetPasswordError());
+    }
+  }, [isResettingPasswordError, dispatch]);
+
   if (isSuccess) {
     return (
       <AuthLayout>
@@ -168,18 +174,6 @@ const ResetForm: React.FC<ResetFormProps> = ({ token }) => {
           <p className="text-sm md:text-md text-zinc-600 dark:text-zinc-400 text-center mt-1">
             Please enter your new password
           </p>
-
-          {(isResettingPasswordError || validationError) && (
-            <ErrorAlert
-              error={isResettingPasswordError || validationError}
-              onClear={() => {
-                dispatch(clearResetPasswordError());
-                setValidationError("");
-              }}
-              autoClose={false}
-              className="mt-4 mx-[2vh] md:mx-0"
-            />
-          )}
 
           <form
             onSubmit={handleReset}

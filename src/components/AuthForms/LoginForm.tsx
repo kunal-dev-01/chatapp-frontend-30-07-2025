@@ -9,14 +9,13 @@ import {
   loginUser,
   clearLoginError,
 } from "@/Redux/UserServices/Slices/auth.slice";
+import { toast } from "react-hot-toast";
 
 const Input = dynamic(() => import("@/components/Layouts/AuthInput"), {
   ssr: false,
 });
 
-const ErrorAlert = dynamic(() => import("../Common/ErrorAlert"), {
-  ssr: false,
-});
+
 
 const LoginForm = () => {
   const router = useRouter();
@@ -60,6 +59,15 @@ const LoginForm = () => {
     }
   }, [isAuthenticated, router]);
 
+    useEffect(() => {
+    if (typeof isLoginError === "string") {
+      toast.error(isLoginError, {
+        duration: 4000,
+      });
+      dispatch(clearLoginError()); // clear after showing
+    }
+  }, [isLoginError, dispatch]);
+
 
   const isFormValid = () => {
     return formData.identifier.trim() && formData.password.trim();
@@ -76,15 +84,6 @@ const LoginForm = () => {
           <p className="text-sm text-zinc-600 dark:text-zinc-400 text-center mt-1">
             We're happy to see you again! Log in below
           </p>
-
-          {isLoginError && (
-            <ErrorAlert
-              error={isLoginError}
-              onClear={() => dispatch(clearLoginError())}
-              autoClose={false}
-              className="mt-4 mx-[2vh] md:mx-0"
-            />
-          )}
 
           <form
             onSubmit={handleLogin}

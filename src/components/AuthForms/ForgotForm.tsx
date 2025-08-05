@@ -9,6 +9,7 @@ import {
   forgotPassword,
   clearForgotPasswordError,
 } from "@/Redux/UserServices/Slices/auth.slice";
+import { toast } from "react-hot-toast";
 
 const Input = dynamic(() => import("@/components/Layouts/AuthInput"), {
   ssr: false,
@@ -19,9 +20,7 @@ const ResetLinkSend = dynamic(() => import("./ResetLinkSend"), {
   loading: () => <Loader />,
 });
 
-const ErrorAlert = dynamic(() => import("../Common/ErrorAlert"), {
-  ssr: false,
-});
+
 
 const ForgotForm = () => {
   const dispatch = useAppDispatch();
@@ -48,6 +47,15 @@ const ForgotForm = () => {
     }
   };
 
+  useEffect(() => {
+    if (typeof isForgotPasswordError === "string") {
+      toast.error(isForgotPasswordError, {
+        duration: 4000,
+      });
+      dispatch(clearForgotPasswordError()); // clear after showing
+    }
+  }, [isForgotPasswordError, dispatch]);
+
   const isFormValid = () => {
     return email.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
@@ -66,15 +74,6 @@ const ForgotForm = () => {
             <p className="text-sm md:text-md text-zinc-600 dark:text-zinc-400 text-center mt-1">
               Please enter the email associated with your account
             </p>
-
-            {isForgotPasswordError && (
-              <ErrorAlert
-                error={isForgotPasswordError}
-                onClear={() => dispatch(clearForgotPasswordError())}
-                autoClose={false}
-                className="mb-3"
-              />
-            )}
 
             <form
               onSubmit={handleForgot}
