@@ -2,7 +2,7 @@ import axios, { AxiosError } from 'axios';
 import { store } from '@/Redux/Store/store';
 import { logout, refreshTokenSuccess } from '@/Redux/UserServices/Slices/auth.slice';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const api = axios.create({
   baseURL: BASE_URL,

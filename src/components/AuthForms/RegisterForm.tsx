@@ -7,8 +7,8 @@ import { useAppDispatch, useAppSelector } from "@/Redux/Hooks/reduxHook";
 import {
   registerUser,
   resendVerificationEmail,
-  clearRegiterError,
-  clearResendVerificationEmailError,
+  clearRegisterState,
+  clearResendVerificationState,
 } from "@/Redux/UserServices/Slices/auth.slice";
 import { toast } from "react-hot-toast";
 
@@ -18,13 +18,10 @@ const Input = dynamic(() => import("@/components/Layouts/AuthInput"), {
 
 const RegisterForm = () => {
   const dispatch = useAppDispatch();
-  const {
-    isRegistering,
-    isRegisteredError,
-    isResendingVerificationEmailError,
-    isResendingVerificationEmail,
-    user,
-  } = useAppSelector((state) => state.auth);
+  
+  // Use the correct selectors from the new slice
+  const registerState = useAppSelector((state) => state.auth.register);
+  const resendVerificationState = useAppSelector((state) => state.auth.resendVerification);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -55,20 +52,11 @@ const RegisterForm = () => {
       const result = await dispatch(registerUser(formData)).unwrap();
       console.log("✅ Registration result:", result);
 
-      // According to your backend, successful registration returns:
-      // { status: 'success', message: '...', data: { user: {...} } }
-      // But the Redux slice returns just the data part
-      
-      // Check if we have user data (which means registration was successful)
-      if (result && result.user) {
+      // Check if registration was successful
+      if (result && result.status === 'success') {
         console.log("✅ Registration successful, showing success step");
         setRegistrationStep("success");
-        toast.success("Registration successful! Please check your email to verify your account.");
-      } else {
-        // Fallback check - if the result exists, consider it successful
-        console.log("✅ Registration completed, showing success step");
-        setRegistrationStep("success");
-        toast.success("Registration successful! Please check your email to verify your account.");
+        toast.success(result.message || "Registration successful! Please check your email to verify your account.");
       }
     } catch (error) {
       console.error("❌ Registration failed:", error);
@@ -82,16 +70,16 @@ const RegisterForm = () => {
 
     try {
       const result = await dispatch(
-        resendVerificationEmail(formData.email)
+        resendVerificationEmail({ email: formData.email })
       ).unwrap();
 
       console.log("✅ Resend result:", result);
 
       if (result && result.status === "success") {
         setResendMessage(
-          "Verification email sent successfully! Please check your inbox."
+          result.message || "Verification email sent successfully! Please check your inbox."
         );
-        toast.success("Verification email sent successfully!");
+        toast.success(result.message || "Verification email sent successfully!");
         
         // Clear message after 5 seconds
         setTimeout(() => {
@@ -113,10 +101,10 @@ const RegisterForm = () => {
 
   const isFormValid = () => {
     return (
-      formData.fullName.trim().length > 0 &&
-      formData.username.trim().length > 0 &&
+      formData.fullName.trim().length >= 2 &&
+      formData.username.trim().length >= 3 &&
       formData.email.trim().length > 0 &&
-      formData.password.trim().length >= 6
+      formData.password.trim().length >= 8
     );
   };
 
@@ -124,38 +112,36 @@ const RegisterForm = () => {
   const handleBackToForm = () => {
     setRegistrationStep("form");
     setResendMessage("");
+    // Clear any existing states
+    dispatch(clearRegisterState());
+    dispatch(clearResendVerificationState());
   };
 
-  // Handle errors with toast
+  // Handle registration errors with toast
   useEffect(() => {
-    if (isRegisteredError) {
-      console.error("❌ Registration error:", isRegisteredError);
-      toast.error(isRegisteredError, {
+    if (registerState?.error) {
+      toast.error(registerState.error, {
         duration: 4000,
       });
-      dispatch(clearRegiterError());
+      // Clear the error after showing toast
+      setTimeout(() => {
+        dispatch(clearRegisterState());
+      }, 100);
     }
-  }, [isRegisteredError, dispatch]);
+  }, [registerState?.error, dispatch]);
 
+  // Handle resend verification errors with toast
   useEffect(() => {
-    if (isResendingVerificationEmailError) {
-      console.error("❌ Resend verification error:", isResendingVerificationEmailError);
-      toast.error(isResendingVerificationEmailError, {
+    if (resendVerificationState?.error) {
+      toast.error(resendVerificationState.error, {
         duration: 4000,
       });
-      dispatch(clearResendVerificationEmailError());
+      // Clear the error after showing toast
+      setTimeout(() => {
+        dispatch(clearResendVerificationState());
+      }, 100);
     }
-  }, [isResendingVerificationEmailError, dispatch]);
-
-  // Debug current state
-  console.log("🔍 RegisterForm State:", {
-    registrationStep,
-    isRegistering,
-    hasUser: !!user,
-    userEmail: user?.email,
-    formEmail: formData.email,
-    isRegisteredError
-  });
+  }, [resendVerificationState?.error, dispatch]);
 
   if (registrationStep === "success") {
     return (
@@ -200,12 +186,12 @@ const RegisterForm = () => {
 
                 {resendMessage && (
                   <div className={`mb-3 p-3 rounded-lg ${
-                    resendMessage.includes('successfully') 
+                    resendMessage.includes('successfully') || resendMessage.includes('sent')
                       ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'
                       : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
                   }`}>
                     <p className={`text-sm ${
-                      resendMessage.includes('successfully')
+                      resendMessage.includes('successfully') || resendMessage.includes('sent')
                         ? 'text-green-700 dark:text-green-300'
                         : 'text-red-700 dark:text-red-300'
                     }`}>
@@ -216,14 +202,14 @@ const RegisterForm = () => {
 
                 <button
                   onClick={handleResendVerification}
-                  disabled={isResendingVerificationEmail}
+                  disabled={resendVerificationState?.loading}
                   className="w-full py-2 rounded-md font-medium text-white 
                            bg-gradient-to-r from-[#9668c2] to-[#7a4dc4] 
                            hover:from-[#8557b3] hover:to-[#6b42b5] 
                            disabled:opacity-50 disabled:cursor-not-allowed
                            transition-all duration-200"
                 >
-                  {isResendingVerificationEmail ? (
+                  {resendVerificationState?.loading ? (
                     <div className="flex items-center gap-2 justify-center">
                       <Loader2 size={16} className="animate-spin" />
                       <span>Sending...</span>
@@ -282,7 +268,8 @@ const RegisterForm = () => {
               value={formData.fullName}
               onChange={(e) => handleInputChange("fullName", e.target.value)}
               required
-              disabled={isRegistering}
+              disabled={registerState?.loading}
+              placeholder="Enter your full name"
             />
 
             <Input
@@ -291,7 +278,8 @@ const RegisterForm = () => {
               value={formData.username}
               onChange={(e) => handleInputChange("username", e.target.value)}
               required
-              disabled={isRegistering}
+              disabled={registerState?.loading}
+              placeholder="Choose a username (min 3 characters)"
             />
 
             <Input
@@ -300,7 +288,8 @@ const RegisterForm = () => {
               value={formData.email}
               onChange={(e) => handleInputChange("email", e.target.value)}
               required
-              disabled={isRegistering}
+              disabled={registerState?.loading}
+              placeholder="Enter your email address"
             />
 
             <Input
@@ -309,20 +298,20 @@ const RegisterForm = () => {
               value={formData.password}
               onChange={(e) => handleInputChange("password", e.target.value)}
               required
-              disabled={isRegistering}
-              placeholder="Minimum 6 characters"
+              disabled={registerState?.loading}
+              placeholder="Minimum 8 characters with uppercase, lowercase & number"
             />
 
             <button
               type="submit"
-              disabled={isRegistering || !isFormValid()}
+              disabled={registerState?.loading || !isFormValid()}
               className="w-full py-2 mt-3 rounded-md font-medium text-white 
                        bg-gradient-to-r from-[#9668c2] to-[#7a4dc4] 
                        hover:from-[#8557b3] hover:to-[#6b42b5]
                        disabled:opacity-50 disabled:cursor-not-allowed
                        transition-all duration-200"
             >
-              {isRegistering ? (
+              {registerState?.loading ? (
                 <div className="flex items-center gap-2 justify-center">
                   <Loader2 size={20} className="animate-spin" />
                   <span>Creating Account...</span>

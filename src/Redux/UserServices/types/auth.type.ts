@@ -1,5 +1,5 @@
 export interface User {
-  _id: string;
+  id: string;
   username: string;
   email: string;
   password: string;
@@ -79,40 +79,71 @@ export interface User {
 }
 
 
-export interface AuthState {
-  user: User | null;
-  accessToken: string | null;
-  isAuthenticated: boolean;
-
-  isCheckingAuth: boolean;
-  isRegistering: boolean;
-  isLoggingIn: boolean;
-  isVerifyingEmail: boolean;
-  isResendingVerificationEmail: boolean;
-  isLogoutting: boolean;
-  isForgotPassword: boolean;
-  isResettingPassword: boolean;
-
-  isCheckingAuthError: string | null;
-  isRegisteredError: string | null;
-  isLoginError: string | null;
-  isVerifyingEmailError: string | null;
-  isResendingVerificationEmailError: string | null;
-  isLogoutError: string | null;
-  isForgotPasswordError: string | null;
-  isResettingPasswordError: string | null;
-
-  isInitialized: boolean;
-}
-
-export interface LoginCredentials {
-  identifier: string;
-  password: string;
-}
-
-export interface RegisterCredentials {
+export interface RegisterRequest {
   username: string;
   email: string;
   password: string;
   fullName: string;
+}
+
+export interface RegisterResponse {
+  status: string;
+  message: string;
+  data: {
+    user: Pick<User, 'id' | 'username' | 'email' | 'fullName' | 'isEmailVerified'>;
+  };
+}
+
+export interface VerifyEmailResponse {
+  status: string;
+  message: string;
+  data: {
+    user: Pick<User, 'id' | 'username' | 'email' | 'fullName' | 'isEmailVerified'>;
+  };
+}
+
+export interface ResendVerificationRequest {
+  email: string;
+}
+
+export interface ResendVerificationResponse {
+  status: string;
+  message: string;
+}
+
+export interface ApiError {
+  message: string;
+  statusCode?: number;
+  errors?: string[];
+}
+
+export interface AuthState {
+  // User data
+  user: User | null;
+  accessToken: string | null;
+  isAuthenticated: boolean;
+  
+  // Register states
+  register: {
+    loading: boolean;
+    error: string | null;
+    success: boolean;
+    message: string | null;
+  };
+  
+  // Verify email states
+  verifyEmail: {
+    loading: boolean;
+    error: string | null;
+    success: boolean;
+    message: string | null;
+  };
+  
+  // Resend verification states
+  resendVerification: {
+    loading: boolean;
+    error: string | null;
+    success: boolean;
+    message: string | null;
+  };
 }
