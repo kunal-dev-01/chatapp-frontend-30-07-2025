@@ -111,39 +111,76 @@ export interface ResendVerificationResponse {
   message: string;
 }
 
+
+// Login
+export interface LoginRequest {
+  identifier: string; // email or username
+  password: string;
+}
+
+export interface LoginResponse extends ApiResponse<{
+  user: User;
+  accessToken: string;
+}> {}
+
+// Forgot Password
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ForgotPasswordResponse extends ApiResponse {}
+
+// Reset Password
+export interface ResetPasswordRequest {
+  password: string;
+  confirmPassword: string;
+}
+
+export interface ResetPasswordResponse extends ApiResponse<{
+  user: User;
+  accessToken: string;
+}> {}
+
+// Check Auth
+export interface CheckAuthResponse extends ApiResponse<{ user: User }> {}
+
+// Refresh Token
+export interface RefreshTokenResponse extends ApiResponse<{
+  accessToken: string;
+}> {}
+
 export interface ApiError {
   message: string;
   statusCode?: number;
   errors?: string[];
 }
 
+export interface ApiResponse<T = any> {
+  status: 'success' | 'error';
+  message: string;
+  data?: T;
+}
+
+export interface AsyncState {
+  loading: boolean;
+  error: string | null;
+  success: boolean;
+  message: string | null;
+}
+
 export interface AuthState {
-  // User data
   user: User | null;
   accessToken: string | null;
   isAuthenticated: boolean;
   
-  // Register states
-  register: {
-    loading: boolean;
-    error: string | null;
-    success: boolean;
-    message: string | null;
-  };
-  
-  // Verify email states
-  verifyEmail: {
-    loading: boolean;
-    error: string | null;
-    success: boolean;
-    message: string | null;
-  };
-  
-  // Resend verification states
-  resendVerification: {
-    loading: boolean;
-    error: string | null;
-    success: boolean;
-    message: string | null;
-  };
+  // Async states
+  register: AsyncState;
+  login: AsyncState;
+  logout: AsyncState;
+  verifyEmail: AsyncState;
+  resendVerification: AsyncState;
+  forgotPassword: AsyncState;
+  resetPassword: AsyncState;
+  checkAuth: AsyncState;
+  refreshToken: AsyncState;
 }

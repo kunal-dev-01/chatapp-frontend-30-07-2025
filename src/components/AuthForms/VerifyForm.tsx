@@ -2,58 +2,89 @@ import React, { useEffect, useState } from 'react';
 import AuthLayout from '../Layouts/AuthLayout';
 import { useAppDispatch, useAppSelector } from '@/Redux/Hooks/reduxHook';
 import { useRouter } from 'next/navigation';
-import { verifyEmail, selectVerifyEmailState, clearVerifyEmailState } from '@/Redux/UserServices/Slices/auth.slice';
+import { verifyEmail, clearVerifyEmailState } from '@/Redux/UserServices/Slices/auth.slice';
 import toast from 'react-hot-toast';
 
 interface VerifyFormProps {
   token: string;
 }
 
-const VerifyForm = ({ token }: VerifyFormProps) => {
+const VerifyForm: React.FC<VerifyFormProps> = ({ token }) => {
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const verifyEmailState = useAppSelector(selectVerifyEmailState);
-  const [isVerifying, setIsVerifying] = useState(false);
+  
+  // Get verify email state from Redux
+  const { 
+    verifyEmail: { loading: isLoading, error: verifyError, success: verifySuccess, message: verifyMessage }
+  } = useAppSelector((state) => state.auth);
+  
+  const [hasVerified, setHasVerified] = useState<boolean>(false);
 
   useEffect(() => {
     // Clear any previous states when component mounts
     dispatch(clearVerifyEmailState());
     
     // Verify email automatically when component loads
-    if (token && !isVerifying) {
-      setIsVerifying(true);
+    if (token && !hasVerified && !isLoading) {
+      setHasVerified(true);
       handleVerifyEmail();
     }
-  }, [token, dispatch, isVerifying]);
+  }, [token, dispatch, hasVerified, isLoading]);
 
-  // Handle verification state changes
+  // Handle verification success
   useEffect(() => {
-    if (verifyEmailState?.success && verifyEmailState?.message) {
-      toast.success(verifyEmailState.message);
-      // Redirect to login or dashboard after successful verification
+    if (verifySuccess && verifyMessage) {
+      toast.success(verifyMessage, {
+        duration: 3000,
+      });
+      
+      // Redirect to login after successful verification
       setTimeout(() => {
-        router.push('/login'); // or wherever you want to redirect
+        router.push('/login');
       }, 2000);
     }
+  }, [verifySuccess, verifyMessage, router]);
 
-    if (verifyEmailState?.error) {
-      toast.error(verifyEmailState.error);
+  // Handle verification errors
+  useEffect(() => {
+    if (verifyError) {
+      toast.error(verifyError, {
+        duration: 4000,
+      });
     }
-  }, [verifyEmailState?.success, verifyEmailState?.error, verifyEmailState?.message, router]);
+  }, [verifyError]);
 
-  const handleVerifyEmail = async () => {
+  const handleVerifyEmail = async (): Promise<void> => {
+    if (!token) {
+      toast.error('No verification token provided');
+      return;
+    }
+
     try {
       await dispatch(verifyEmail(token)).unwrap();
     } catch (error) {
-      // Error is already handled in the useEffect above
       console.log('Verification failed:', error);
+      // Error is handled by useEffect above
     }
   };
 
-  const handleRetryVerification = () => {
+  const handleRetryVerification = (): void => {
     dispatch(clearVerifyEmailState());
-    setIsVerifying(true);
-    handleVerifyEmail();
+    setHasVerified(false);
+    
+    // Retry verification after a small delay
+    setTimeout(() => {
+      setHasVerified(true);
+      handleVerifyEmail();
+    }, 100);
+  };
+
+  const handleGoToLogin = (): void => {
+    router.push('/login');
+  };
+
+  const handleRequestNewEmail = (): void => {
+    router.push('/resend-verification');
   };
 
   return (
@@ -61,22 +92,22 @@ const VerifyForm = ({ token }: VerifyFormProps) => {
       <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
           <div className="text-center">
-            <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+            <h2 className="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white">
               Email Verification
             </h2>
-            <p className="mt-2 text-sm text-gray-600">
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
               We're verifying your email address
             </p>
           </div>
 
           <div className="mt-8 space-y-6">
             <div className="text-center">
-              {verifyEmailState?.loading ? (
+              {isLoading ? (
                 <div className="space-y-4">
                   <div className="inline-flex items-center justify-center w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-                  <p className="text-gray-600">Verifying your email...</p>
+                  <p className="text-gray-600 dark:text-gray-400">Verifying your email...</p>
                 </div>
-              ) : verifyEmailState?.success ? (
+              ) : verifySuccess ? (
                 <div className="space-y-4">
                   <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full">
                     <svg
@@ -97,12 +128,12 @@ const VerifyForm = ({ token }: VerifyFormProps) => {
                     <h3 className="text-lg font-medium text-green-600">
                       Email Verified Successfully!
                     </h3>
-                    <p className="text-gray-600 mt-2">
-                      Your email has been verified. Redirecting you to login...
+                    <p className="text-gray-600 dark:text-gray-400 mt-2">
+                      {verifyMessage || 'Your email has been verified. Redirecting you to login...'}
                     </p>
                   </div>
                 </div>
-              ) : verifyEmailState?.error ? (
+              ) : verifyError ? (
                 <div className="space-y-4">
                   <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full">
                     <svg
@@ -123,22 +154,23 @@ const VerifyForm = ({ token }: VerifyFormProps) => {
                     <h3 className="text-lg font-medium text-red-600">
                       Verification Failed
                     </h3>
-                    <p className="text-gray-600 mt-2">
-                      {verifyEmailState?.error}
+                    <p className="text-gray-600 dark:text-gray-400 mt-2">
+                      {verifyError}
                     </p>
                   </div>
                   <button
                     onClick={handleRetryVerification}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+                    disabled={isLoading}
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                   >
-                    Try Again
+                    {isLoading ? 'Retrying...' : 'Try Again'}
                   </button>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full">
                     <svg
-                      className="w-8 h-8 text-gray-600"
+                      className="w-8 h-8 text-gray-600 dark:text-gray-400"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -152,19 +184,19 @@ const VerifyForm = ({ token }: VerifyFormProps) => {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-lg font-medium text-gray-900">
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                       Ready to Verify
                     </h3>
-                    <p className="text-gray-600 mt-2">
+                    <p className="text-gray-600 dark:text-gray-400 mt-2">
                       Click the button below to verify your email address
                     </p>
                   </div>
                   <button
                     onClick={handleVerifyEmail}
-                    disabled={!token}
+                    disabled={!token || isLoading}
                     className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200"
                   >
-                    Verify Email
+                    {isLoading ? 'Verifying...' : 'Verify Email'}
                   </button>
                 </div>
               )}
@@ -172,18 +204,18 @@ const VerifyForm = ({ token }: VerifyFormProps) => {
 
             {/* Additional actions */}
             <div className="text-center space-y-2">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 Having trouble?{' '}
                 <button
-                  onClick={() => router.push('/auth/resend-verification')}
+                  onClick={handleRequestNewEmail}
                   className="font-medium text-blue-600 hover:text-blue-500 transition-colors duration-200"
                 >
                   Request a new verification email
                 </button>
               </p>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 <button
-                  onClick={() => router.push('/auth/login')}
+                  onClick={handleGoToLogin}
                   className="font-medium text-blue-600 hover:text-blue-500 transition-colors duration-200"
                 >
                   Back to Login

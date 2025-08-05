@@ -1,6 +1,6 @@
 import axios, { AxiosError } from 'axios';
 import { store } from '@/Redux/Store/store';
-import { logout, refreshTokenSuccess } from '@/Redux/UserServices/Slices/auth.slice';
+import { logout, setAuthData } from '@/Redux/UserServices/Slices/auth.slice';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -62,7 +62,7 @@ api.interceptors.response.use(
     const newAccessToken = response.headers['x-new-access-token'];
     if (newAccessToken) {
       console.log('🔄 Refreshing access token from header...');
-      store.dispatch(refreshTokenSuccess(newAccessToken));
+      store.dispatch(setAuthData(newAccessToken));
     }
     
     return response;
@@ -108,7 +108,7 @@ api.interceptors.response.use(
         const { accessToken } = response.data.data;
         console.log('✅ Token refresh successful');
         
-        store.dispatch(refreshTokenSuccess(accessToken));
+        store.dispatch(setAuthData(accessToken));
         
         // Process queued requests
         processQueue(null, accessToken);
