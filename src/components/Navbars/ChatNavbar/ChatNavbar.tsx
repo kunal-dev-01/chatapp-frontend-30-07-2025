@@ -23,7 +23,7 @@ const ChatNavbar = () => {
 
       <div className="flex items-center gap-[1.2vh] md:gap-[.8vw]">
 
-        <button ref={buttonRef} className="px-3 py-1.5 md:px-[.9vw] md:py-[.4vw] cursor-pointer hover:bg-zinc-300 dark:hover:bg-zinc-700 rounded-full transition-all duration-200 ease-in-out">
+        <button ref={buttonRef} className="px-3 py-1.5 md:px-[.9vw] md:py-[.3vw] cursor-pointer hover:bg-zinc-300 dark:hover:bg-zinc-700 rounded-full transition-all duration-200 ease-in-out">
           <Bell size={30} />
         </button>
 
