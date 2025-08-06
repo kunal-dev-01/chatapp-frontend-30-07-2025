@@ -1,23 +1,12 @@
+import React from 'react'
 import { LucideMenu, PlusSquareIcon } from 'lucide-react'
-import { addRipple } from '@/components/Layouts/RippleEffect'
-import React,{useEffect,useRef} from 'react'
+import { useRipple } from '@/components/Layouts/UseRipple'
 
 const HeadAndCreateGroup = () => {
 
-    const plusRef = useRef<HTMLDivElement>(null)
-    const menuRef = useRef<HTMLDivElement>(null)
+    const plusRef = useRipple<HTMLDivElement>();
+    const menuRef = useRipple<HTMLDivElement>();
 
-    useEffect(()=>{
-        if(plusRef.current){
-            addRipple(plusRef.current)
-        }
-    },[])
-
-    useEffect(()=>{
-        if(menuRef.current){
-            addRipple(menuRef.current)
-        }
-    },[])
 
   return (
     <div className='w-full flex items-center justify-between'>

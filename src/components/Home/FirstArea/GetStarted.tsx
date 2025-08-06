@@ -1,15 +1,9 @@
-import React, { useEffect, useRef } from "react";
-import { addRipple } from "../../Layouts/RippleEffect";
+import React from "react";
+import { useRipple } from "@/components/Layouts/UseRipple";
 import { ArrowRight } from "lucide-react";
 
 const GetStarted = () => {
-  const buttonRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    if (buttonRef.current) {
-      addRipple(buttonRef.current);
-    }
-  }, []);
+  const buttonRef = useRipple<HTMLButtonElement>();
 
   return (
     <button

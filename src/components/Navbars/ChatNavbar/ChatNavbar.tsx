@@ -1,18 +1,13 @@
 import Link from "next/link";
 import Image from "next/image";
-import {addRipple} from "@/components/Layouts/RippleEffect";
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import { Bell } from "lucide-react";
+import { useRipple } from "@/components/Layouts/UseRipple";
 
 const ChatNavbar = () => {
 
-  const buttonRef = useRef<HTMLButtonElement>(null);
+  const buttonRef = useRipple<HTMLButtonElement>();
 
-  useEffect(() => {
-    if (buttonRef.current) {
-      addRipple(buttonRef.current);
-    }
-  }, []);
 
   return (
     <div className="w-full md:h-[3vw] h-[7vh] md:py-[.5vw] md:px-[.8vw] px-[1vh] md:rounded-full border-2 border-zinc-100/20 dark:border-zinc-700/50 flex items-center justify-between bg-zinc-200/10 dark:bg-zinc-800/20 backdrop-blur-md md:shadow-[inset_0_0_8px_rgba(0,0,0,0.1)] md:dark:shadow-[inset_0_0_8px_rgba(255,255,255,0.05)]">
