@@ -1,5 +1,5 @@
 import React from 'react'
-import { LucideMenu, PlusSquareIcon } from 'lucide-react'
+import { EllipsisVertical,  Plus } from 'lucide-react'
 import { useRipple } from '@/components/Layouts/UseRipple'
 
 const HeadAndCreateGroup = () => {
@@ -14,11 +14,11 @@ const HeadAndCreateGroup = () => {
 
         <div className="flex items-center gap-1">
             <div ref={plusRef} className="p-2 rounded-lg hover:bg-zinc-300 transition-colors duration-200 cursor-pointer">
-                <PlusSquareIcon size={25}/>
+                <Plus size={25}/>
             </div>
 
             <div ref={menuRef} className="p-2 rounded-lg hover:bg-zinc-300 transition-colors duration-200 cursor-pointer">
-                <LucideMenu size={25}/>
+                <EllipsisVertical size={25}/>
             </div>
         </div>
     </div>

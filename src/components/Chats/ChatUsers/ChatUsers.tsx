@@ -26,17 +26,14 @@ const HeadAndCreateGroup = dynamic(() => import("./HeadAndCreateGroup"), {
   ),
 });
 
+const AllUsers = dynamic(() => import("./AllUsers"), {
+  ssr: false
+});
+
 const ChatUsers = () => {
   return (
-    <div
-      className="w-[100vw] md:w-[30vw] h-[calc(100vh-7vh)] md:h-[75vh] md:rounded-l-xl md:p-[1vw] p-[1vh] bg-zinc-200"
-      style={{
-        boxShadow:
-          window.innerWidth >= 768
-            ? "inset 0 8px 8px -8px rgba(0,0,0,0.1), inset 0 -8px 8px -8px rgba(0,0,0,0.1), inset 8px 0 8px -8px rgba(0,0,0,0.1)"
-            : "none",
-      }}
-    >
+    <div className="w-[100vw] md:w-[30vw] h-[calc(100vh-7vh)] md:h-[75vh] md:rounded-l-xl md:p-[1vw] p-[1vh] bg-zinc-200 md:shadow-[inset_0_8px_8px_-8px_rgba(0,0,0,0.1),inset_0_-8px_8px_-8px_rgba(0,0,0,0.1),inset_8px_0_8px_-8px_rgba(0,0,0,0.1)]">
+
       <div className="w-full">
         <HeadAndCreateGroup/>
       </div>
@@ -44,6 +41,11 @@ const ChatUsers = () => {
       <div className="w-full mt-3">
         <ChatUserSearch />
       </div>
+
+      <div className="w-full mt-3">
+        <AllUsers />
+      </div>
+      
     </div>
   );
 };
