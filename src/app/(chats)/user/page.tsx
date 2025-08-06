@@ -33,7 +33,7 @@ const ChatNavbar = dynamic(
   }
 );
 
-const ChatIndex = dynamic(() => import("@/components/Chats/ChatIndex"), {
+const ChatIndex = dynamic(() => import("@/components/Chats/MessageBox/ChatIndex"), {
   ssr: false,
   loading: () => (
     <Skeleton
@@ -46,7 +46,7 @@ const ChatIndex = dynamic(() => import("@/components/Chats/ChatIndex"), {
   ),
 });
 
-const ChatUsers = dynamic(() => import("@/components/Chats/ChatUsers"), {
+const ChatUsers = dynamic(() => import("@/components/Chats/ChatUsers/ChatUsers"), {
   ssr: false,
   loading: () => (
     <Skeleton

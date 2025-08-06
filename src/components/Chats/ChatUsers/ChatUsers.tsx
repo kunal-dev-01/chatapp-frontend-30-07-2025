@@ -2,20 +2,29 @@ import React from "react";
 import dynamic from "next/dynamic";
 import Skeleton from "@/components/Layouts/Skeleton";
 
-const ChatUserSearch = dynamic(
-  () => import("@/components/Chats/ChatUserSearch"),
-  {
-    ssr: false,
-    loading: () => (
-      <Skeleton
-        width="w-full"
-        height="h-12"
-        rounded="rounded-md"
-        animation="shimmer"
-      />
-    ),
-  }
-);
+const ChatUserSearch = dynamic(() => import("./ChatUserSearch"), {
+  ssr: false,
+  loading: () => (
+    <Skeleton
+      width="w-full"
+      height="h-12"
+      rounded="rounded-full"
+      animation="shimmer"
+    />
+  ),
+});
+
+const HeadAndCreateGroup = dynamic(() => import("./HeadAndCreateGroup"), {
+  ssr: false,
+  loading: () => (
+    <Skeleton
+      width="w-full"
+      height="h-12"
+      rounded="rounded-md"
+      animation="shimmer"
+    />
+  ),
+});
 
 const ChatUsers = () => {
   return (
@@ -28,7 +37,11 @@ const ChatUsers = () => {
             : "none",
       }}
     >
-      <div className="w-full flex items-center justify-center">
+      <div className="w-full">
+        <HeadAndCreateGroup/>
+      </div>
+
+      <div className="w-full mt-3">
         <ChatUserSearch />
       </div>
     </div>
