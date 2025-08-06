@@ -25,7 +25,7 @@ const ChatNavbar = dynamic(
     loading: () => (
       <Skeleton
         width="w-full"
-        height="h-[6vh] md:h-[3vw]"
+        height="h-[7vh] md:h-[3vw]"
         rounded="rounded-full"
         animation="shimmer"
       />
@@ -38,9 +38,10 @@ const ChatIndex = dynamic(() => import("@/components/Chats/ChatIndex"), {
   loading: () => (
     <Skeleton
       width="w-full"
-      height="h-[70vh] md:h-[50vh]"
+      height="h-[91vh] md:h-[75vh]"
       rounded="rounded-md"
       animation="shimmer"
+      className="mt-2 md:mt-0"
     />
   ),
 });
@@ -50,9 +51,10 @@ const ChatUsers = dynamic(() => import("@/components/Chats/ChatUsers"), {
   loading: () => (
     <Skeleton
       width="w-full"
-      height="h-[70vh] md:h-[50vh]"
+      height="h-[91vh] md:h-[75vh]"
       rounded="rounded-md"
       animation="shimmer"
+      className="mt-2 md:mt-0"
     />
   ),
 });

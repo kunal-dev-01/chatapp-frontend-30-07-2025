@@ -1,12 +1,25 @@
-import React from 'react'
+import React,{useRef,useEffect} from "react";
+import { addRipple } from "../Layouts/RippleEffect";
 
 const ChatUserSearch = () => {
 
-  return (
-    <div className='w-full md:w-[calcu(100vw-3vw)] bg-zinc-200 dark:bg-zinc-800'>
-      
-    </div>
-  )
-}
+  const divRef = useRef<HTMLDivElement>(null)
 
-export default ChatUserSearch
+    useEffect(() => {
+      if (divRef.current) {
+        addRipple(divRef.current);
+      }
+    }, []);
+
+  return (
+    <div ref={divRef} className="w-full bg-transparent cursor-pointer rounded-full">
+      <input
+        type="text"
+        placeholder="Search chat users..."
+        className="w-full md:pl-[3vw] pl-[7vh] pt-[.8vh] pb-[.6vh] outline-none rounded-full bg-zinc-300 placeholder:text-[2vh]"
+      />
+    </div>
+  );
+};
+
+export default ChatUserSearch;
