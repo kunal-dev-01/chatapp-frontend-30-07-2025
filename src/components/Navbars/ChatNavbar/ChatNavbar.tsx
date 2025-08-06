@@ -15,7 +15,7 @@ const ChatNavbar = () => {
   }, []);
 
   return (
-    <div className="w-full md:h-[3vw] h-[6.7vh] md:py-[.5vw] md:px-[.8vw] px-[1vh] md:rounded-full border-2 border-zinc-100/20 dark:border-zinc-700/50 flex items-center justify-between bg-zinc-200/10 dark:bg-zinc-800/20 backdrop-blur-md md:shadow-[0_0_20px_rgba(113,113,122,0.4)] md:dark:shadow-[0_0_20px_rgba(161,161,170,0.3)]">
+    <div className="w-full md:h-[3vw] h-[7vh] md:py-[.5vw] md:px-[.8vw] px-[1vh] md:rounded-full border-2 border-zinc-100/20 dark:border-zinc-700/50 flex items-center justify-between bg-zinc-200/10 dark:bg-zinc-800/20 backdrop-blur-md md:shadow-[inset_0_0_8px_rgba(0,0,0,0.1)] md:dark:shadow-[inset_0_0_8px_rgba(255,255,255,0.05)]">
 
       <h1 className="font-prime text-transparent bg-clip-text bg-gradient-to-r from-[#FF6B6B] via-pink-500 to-violet-500 md:text-[2vw] text-[4vh] cursor-pointer select-none">
         Sova

@@ -67,13 +67,23 @@ const Chats = () => {
 
 
   return (
-    <div className="w-full h-screen md:p-3">
-      <div className="w-full md:p-3 md:rounded-2xl md:border-2 dark:border-zinc-600 border-gray-300 bg-zinc-200 dark:bg-zinc-800 md:shadow-[inset_0_0_8px_rgba(0,0,0,0.1)] md:dark:shadow-[inset_0_0_8px_rgba(255,255,255,0.05)]">
+    <div className="w-full h-screen md:p-[1vw]">
+      <div className="w-full md:p-[.5vw] md:rounded-2xl md:border-2 dark:border-zinc-600 border-gray-300 bg-zinc-200 dark:bg-zinc-800 md:shadow-[inset_0_0_8px_rgba(0,0,0,0.1)] md:dark:shadow-[inset_0_0_8px_rgba(255,255,255,0.05)]">
+
+
         <div className="w-full">
-          <ChatNavbar />
+          {tab === "chats" || tab === "groups" ? (
+              <ChatNavbar />
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <p className="text-gray-500 dark:text-gray-400">
+                  Please select a valid tab.
+                </p>
+              </div>
+            )}
         </div>
 
-        <div className="flex items-center md:mt-2 w-full md:w-[30vw]">
+        <div className="flex items-center md:mt-3 w-full md:w-[30vw]">
           <div className="">
             {tab === "chats" &&  <ChatUsers />}
           </div>
@@ -82,17 +92,8 @@ const Chats = () => {
             <ChatIndex />
           </div>
         </div>
-        {/* <div className="md:py-[.5vw] md:px-[1vw] p-1 ">
-            {tab === "chats" || tab === "groups" ? (
-              <ChatNavigate />
-            ) : (
-              <div className="flex items-center justify-center h-full">
-                <p className="text-gray-500 dark:text-gray-400">
-                  Please select a valid tab.
-                </p>
-              </div>
-            )}
-          </div> */}
+
+
       </div>
     </div>
   );

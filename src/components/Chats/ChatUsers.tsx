@@ -16,10 +16,17 @@ const ChatUserSearch = dynamic(() => import('@/components/Chats/ChatUserSearch')
 
 const ChatUsers = () => {
   return (
-    <div className='w-[100vw] md:w-[30vw] h-screen md:h-[75vh] rounded-l-xl md:p-[1vw] p-[1vh] bg-zinc-100'>
-        <div className="w-full md:w-[30vw]">
-            <ChatUserSearch />
-        </div>
+    <div 
+      className='w-[100vw] md:w-[30vw] h-[calc(100vh-7vh)] md:h-[75vh] md:rounded-l-xl md:p-[1vw] p-[1vh] bg-zinc-200'
+      style={{
+        boxShadow: window.innerWidth >= 768 ? 
+          'inset 0 8px 8px -8px rgba(0,0,0,0.1), inset 0 -8px 8px -8px rgba(0,0,0,0.1), inset 8px 0 8px -8px rgba(0,0,0,0.1)' 
+          : 'none'
+      }}
+    >
+      <div className="w-full md:w-[30vw]">
+        <ChatUserSearch />
+      </div>
     </div>
   )
 }

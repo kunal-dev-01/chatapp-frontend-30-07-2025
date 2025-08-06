@@ -1,20 +1,10 @@
 import React from 'react'
-import { useAppDispatch,useAppSelector } from '@/Redux/Hooks/reduxHook'
-import { logoutUser } from '@/Redux/UserServices/Slices/auth.slice'
 
 const ChatUserSearch = () => {
 
-  const dispatch = useAppDispatch()
-
-  const handleLogout = async() => {
-    await dispatch(logoutUser()).unwrap()
-  }
-
-
-
   return (
-    <div onClick={handleLogout} className=''>
-      Logout
+    <div className='w-full md:w-[calcu(100vw-3vw)] bg-zinc-200 dark:bg-zinc-800'>
+      
     </div>
   )
 }
