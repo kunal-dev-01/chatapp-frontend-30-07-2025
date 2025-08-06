@@ -7,10 +7,23 @@ const UserLayout = dynamic(() => import('./UserLayout'), {
 
 const AllUsers = () => {
   return (
-    <div className='w-full flex flex-col items-center overflow-y-scroll hide-scrollbar'>
-      <div className="w-full">
+    <div className='w-full md:h-[60vh] h-[calc(100vh-20vh)] flex flex-col items-center overflow-y-scroll scrollbar-hide pb-5 relative'>
         <UserLayout />
-      </div>
+        <UserLayout />
+        <UserLayout />
+        <UserLayout />
+        <UserLayout />
+        <UserLayout />
+        <UserLayout />
+        <UserLayout />
+        <UserLayout />
+        <UserLayout />
+        <UserLayout />
+        <UserLayout />
+        <UserLayout />
+        <UserLayout />
+
+        <div className="w-full h-[4vh] bg-gradient-to-t from-zinc-200 to-transparent absolute bottom-0"></div>
     </div>
   )
 }
