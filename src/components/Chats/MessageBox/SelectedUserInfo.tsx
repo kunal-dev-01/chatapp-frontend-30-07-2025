@@ -7,7 +7,7 @@ const SelectedUserInfo = () => {
   const selectedChatRef = useRipple<HTMLDivElement>();
 
   return (
-    <div className="w-full md:h-[3.2vw] absolute z-2 top-0 rounded-tr-xl bg-zinc-200/40 backdrop-blur-md md:shadow-[inset_0_8px_8px_-8px_rgba(0,0,0,0.1),inset_-8px_0_8px_-8px_rgba(0,0,0,0.1)] flex items-center justify-between md:px-[1vw] ">
+    <div className="w-full md:h-[3.2vw] absolute z-2 top-0 rounded-tr-xl backdrop-blur-xl flex items-center justify-between md:px-[1vw] ">
       <div className="flex items-center md:gap-[.8vw]">
         <div className="w-12 h-12 select-none cursor-pointer rounded-full flex-shrink-0 border-2 border-purple-400">
           <Image
@@ -22,7 +22,7 @@ const SelectedUserInfo = () => {
 
         <div className=" min-w-0 relative overflow-hidden">
           {/* Username */}
-          <h3 className="text-md font-semibold text-zinc-900 dark:text-zinc-200 truncate">
+          <h3 className="text-md font-semibold text-zinc-100 dark:text-zinc-200 truncate">
             John Doe
             {/* User Status */}
             <span className="text-xs text-zinc-200 dark:text-zinc-400 ml-1.5">
