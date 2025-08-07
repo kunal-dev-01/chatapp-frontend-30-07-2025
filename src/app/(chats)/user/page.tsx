@@ -59,6 +59,19 @@ const ChatUsers = dynamic(() => import("@/components/MainUi/ChatUsers/ChatUsers"
   ),
 });
 
+const SettingPage = dynamic(() => import("@/components/MainUi/Settings/SettingPage"), {
+  ssr: false,
+  loading: () => (
+    <Skeleton
+      width="w-full"
+      height="h-[91vh] md:h-[75vh]"
+      rounded="rounded-md"
+      animation="shimmer"
+      className="mt-2 md:mt-0"
+    />
+  ),
+});
+
 const Chats = () => {
   const searchParams = useSearchParams();
   const tab = searchParams.get("tab");
@@ -74,7 +87,7 @@ const Chats = () => {
 
 
         <div className="w-full">
-          {tab === "chats" || tab === "groups" ? (
+          {tab === "chats" || tab === "groups" || tab === "settings"  ? (
               <ChatNavbar />
             ) : (
               <div className="flex items-center justify-center h-full">
@@ -88,6 +101,7 @@ const Chats = () => {
         <div className="flex items-center md:mt-3 w-full md:w-[30vw]">
           <div className="">
             {tab === "chats" &&  <ChatUsers />}
+            {tab === "settings" && <SettingPage/>}
           </div>
 
           <div className="hidden md:block">
