@@ -6,7 +6,7 @@ import Skeleton from "@/components/Layouts/Skeleton";
 
 import { useAppSelector } from "@/Redux/Hooks/reduxHook";
 
-const ChatNavigate = dynamic(() => import("@/components/Chats/ChatNavigate"), {
+const ChatNavigate = dynamic(() => import("@/components/MainUi/ChatNavigate"), {
   ssr: false,
   loading: () => (
     <Skeleton
@@ -33,7 +33,7 @@ const ChatNavbar = dynamic(
   }
 );
 
-const ChatIndex = dynamic(() => import("@/components/Chats/MessageBox/ChatIndex"), {
+const ChatIndex = dynamic(() => import("@/components/MainUi/MessageBox/ChatIndex"), {
   ssr: false,
   loading: () => (
     <Skeleton
@@ -46,7 +46,7 @@ const ChatIndex = dynamic(() => import("@/components/Chats/MessageBox/ChatIndex"
   ),
 });
 
-const ChatUsers = dynamic(() => import("@/components/Chats/ChatUsers/ChatUsers"), {
+const ChatUsers = dynamic(() => import("@/components/MainUi/ChatUsers/ChatUsers"), {
   ssr: false,
   loading: () => (
     <Skeleton
