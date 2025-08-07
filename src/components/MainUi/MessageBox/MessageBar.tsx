@@ -1,5 +1,10 @@
 import { Plus, SendHorizonal, Smile } from 'lucide-react'
 import React from 'react'
+import dynamic from 'next/dynamic'
+
+const EmojiPicker = dynamic(()=> import("../../EmojiPicker/EmojiPicker"),{
+    ssr:false
+})
 
 const MessageBar = () => {
   return (

@@ -6,7 +6,7 @@ import Skeleton from "@/components/Layouts/Skeleton";
 
 import { useAppSelector } from "@/Redux/Hooks/reduxHook";
 
-const ChatNavigate = dynamic(() => import("@/components/MainUi/ChatNavigate"), {
+const ChatNavigate = dynamic(() => import("@/components/MainUi/ChatUsers/ChatNavigate"), {
   ssr: false,
   loading: () => (
     <Skeleton
@@ -87,7 +87,7 @@ const Chats = () => {
 
 
         <div className="w-full">
-          {tab === "chats" || tab === "groups" || tab === "settings"  ? (
+          {tab !== ""  ? (
               <ChatNavbar />
             ) : (
               <div className="flex items-center justify-center h-full">

@@ -11,7 +11,6 @@ const FirstArea = dynamic(() => import("@/components/Home/FirstArea/FirstArea"),
   loading: () => <Skeleton width="w-full" height="md:h-[80vh] h-[60vh]" rounded="rounded-md" animation="shimmer" className='mt-2'/>,
 });
 
-
 const Home = () => {
   return (
     <main className='w-full h-screen'>
