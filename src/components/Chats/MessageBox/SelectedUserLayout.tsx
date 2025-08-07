@@ -9,11 +9,22 @@ const SelectedUserInfo = dynamic(() => import("./SelectedUserInfo"), {
     <Skeleton
       width="w-full"
       height="md:h-[3vw]"
-      rounded="rounded-b-xl"
       animation="shimmer"
     />
   ),
 });
+
+const MessageBar = dynamic(() => import("./MessageBar"), {
+  ssr: false,
+  loading: () => (
+    <Skeleton
+      width="w-full"
+      height="md:h-[3vw]"
+      animation="shimmer"
+    />
+  ),
+});
+
 
 const SelectedUserLayout = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -32,6 +43,7 @@ const SelectedUserLayout = ({ children }: { children: React.ReactNode }) => {
 
         {children}
       </div>
+      <MessageBar/>
     </div>
   );
 };
