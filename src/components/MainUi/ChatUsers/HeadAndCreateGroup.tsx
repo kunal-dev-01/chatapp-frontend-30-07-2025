@@ -10,7 +10,7 @@ const HeadAndCreateGroup = () => {
 
   return (
     <div className='w-full flex items-center justify-between'>
-        <h1 className='md:text-[1.2vw] text-[2.5vh] text-zinc-500 dark:text-zinc-200 font-semibold'>Chats</h1>
+        <h1 className='md:text-[1.2vw] text-[2.5vh] text-zinc-600 dark:text-zinc-200 font-semibold'>Chats</h1>
 
         <div className="flex items-center gap-1">
             <div ref={plusRef} className="p-2 rounded-lg hover:bg-zinc-300 transition-colors duration-200 cursor-pointer">

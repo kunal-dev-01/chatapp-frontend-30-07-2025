@@ -42,7 +42,7 @@ const ChatUsers = () => {
         <ChatUserSearch />
       </div>
 
-      <div className="w-full mt-3">
+      <div className="w-full md:h-[60vh] h-[calc(100vh-26vh)] mt-3 rounded-lg">
         <AllUsers />
       </div>
       
