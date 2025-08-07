@@ -37,9 +37,9 @@ const ChatIndex = dynamic(() => import("@/components/MainUi/MessageBox/ChatIndex
   ssr: false,
   loading: () => (
     <Skeleton
-      width="w-full"
+      width="w-full md:w-[calc(100vw-33.3vw)]"
       height="h-[91vh] md:h-[75vh]"
-      rounded="rounded-md"
+      rounded="rounded-r-md"
       animation="shimmer"
       className="mt-2 md:mt-0"
     />
@@ -50,9 +50,9 @@ const ChatUsers = dynamic(() => import("@/components/MainUi/ChatUsers/ChatUsers"
   ssr: false,
   loading: () => (
     <Skeleton
-      width="w-full"
+      width="w-full md:w-[30vw]"
       height="h-[91vh] md:h-[75vh]"
-      rounded="rounded-md"
+      rounded="rounded-l-md"
       animation="shimmer"
       className="mt-2 md:mt-0"
     />
@@ -63,9 +63,9 @@ const SettingPage = dynamic(() => import("@/components/MainUi/Settings/SettingPa
   ssr: false,
   loading: () => (
     <Skeleton
-      width="w-full"
+      width="w-full md:w-[30vw]"
       height="h-[91vh] md:h-[75vh]"
-      rounded="rounded-md"
+      rounded="rounded-l-md"
       animation="shimmer"
       className="mt-2 md:mt-0"
     />

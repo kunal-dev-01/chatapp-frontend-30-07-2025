@@ -2,7 +2,9 @@ import React from 'react'
 
 const SettingHead = () => {
   return (
-    <div>SettingHead</div>
+    <div className='w-full'>
+
+    </div>
   )
 }
 
