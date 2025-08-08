@@ -24,9 +24,9 @@ const CategorySlider = React.memo<{
         
         {/* Recent category */}
         {recentEmojis.length > 0 && (
-          <button
+          <div
             onClick={() => onCategoryClick('Recent')}
-            className={`flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 snap-center ${
+            className={`flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 snap-center outline-none focus:outline-none ${
               activeCategory === 'Recent'
                 ? 'bg-purple-100 dark:bg-green-900/30 border-2 border-purple-500 scale-110'
                 : 'hover:bg-gray-100 dark:hover:bg-zinc-600 hover:scale-110'
@@ -37,19 +37,19 @@ const CategorySlider = React.memo<{
                 ? 'text-purple-600 dark:text-purple-400'
                 : 'text-gray-600 dark:text-gray-300'
             }`} />
-          </button>
+          </div>
         )}
 
         {/* Category buttons */}
         {categories.map((category) => {
           const IconComponent = category.icon;
           return (
-            <button
+            <div
               key={category.name}
               onClick={() => onCategoryClick(category.name)}
-              className={`flex-shrink-0 flex items-center justify-center w-13 h-10 rounded-3xl transition-all duration-200 snap-center outline-none ${
+              className={`flex-shrink-0 flex items-center justify-center w-13 h-10 rounded-3xl transition-all duration-200 snap-center outline-none focus:outline-none ${
                 activeCategory === category.name
-                  ? 'bg-purple-100 dark:bg-green-900/30 border-2 border-purple-500 scale-110'
+                  ? 'bg-purple-100 dark:bg-purple-900/30 border-2 border-purple-500 scale-110'
                   : 'hover:bg-gray-100 dark:hover:bg-zinc-600 hover:scale-110'
               }`}
             >
@@ -60,7 +60,7 @@ const CategorySlider = React.memo<{
                     : 'text-gray-600 dark:text-gray-300'
                 }`}
               />
-            </button>
+            </div>
           );
         })}
       </div>

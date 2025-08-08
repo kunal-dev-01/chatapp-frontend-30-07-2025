@@ -72,6 +72,19 @@ const SettingPage = dynamic(() => import("@/components/MainUi/Settings/SettingPa
   ),
 });
 
+const ProfilePage = dynamic(() => import("@/components/MainUi/Profile/ProfilePage"), {
+  ssr: false,
+  loading: () => (
+    <Skeleton
+      width="w-full md:w-[30vw]"
+      height="h-[91vh] md:h-[75vh]"
+      rounded="rounded-l-md"
+      animation="shimmer"
+      className="mt-2 md:mt-0"
+    />
+  ),
+});
+
 const Chats = () => {
   const searchParams = useSearchParams();
   const tab = searchParams.get("tab");
@@ -102,6 +115,7 @@ const Chats = () => {
           <div className="">
             {tab === "chats" &&  <ChatUsers />}
             {tab === "settings" && <SettingPage/>}
+            {tab === "profile" && <ProfilePage/>}
           </div>
 
           <div className="hidden md:block">
