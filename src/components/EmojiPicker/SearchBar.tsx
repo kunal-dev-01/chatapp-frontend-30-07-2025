@@ -14,7 +14,7 @@ const SearchBar = React.memo<{
           placeholder="Search emojis..."
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full pl-10 pr-4 py-3 bg-gray-100 dark:bg-zinc-800 border-none rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-900 dark:text-gray-100 transition-all duration-200"
+          className="w-full pl-10 pr-4 py-3 bg-gray-200 dark:bg-zinc-800 border-none rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 dark:text-gray-100 transition-all duration-200"
         />
       </div>
     </div>

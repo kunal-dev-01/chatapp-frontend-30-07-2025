@@ -25,32 +25,32 @@ export interface RecentEmoji {
 
 // Skeleton Loading Component
 export const EmojiSkeleton: React.FC = () => (
-  <div className="w-full max-w-md mx-auto bg-white dark:bg-zinc-700 border border-gray-200 dark:border-gray-600 rounded-2xl shadow-xl overflow-hidden">
+  <div className="w-full mx-auto bg-white dark:bg-zinc-700 border border-gray-200 dark:border-gray-600 rounded-2xl shadow-xl overflow-hidden">
     {/* Header Skeleton */}
     <div className="flex border-b border-gray-200 dark:border-gray-600">
       <div className="flex-1 p-4">
-        <div className="h-5 bg-gray-200 dark:bg-zinc-600 rounded animate-pulse"></div>
+        <div className="h-3 bg-gray-200 dark:bg-zinc-600 rounded animate-pulse"></div>
       </div>
       <div className="flex-1 p-4">
-        <div className="h-5 bg-gray-200 dark:bg-zinc-600 rounded animate-pulse"></div>
+        <div className="h-3 bg-gray-200 dark:bg-zinc-600 rounded animate-pulse"></div>
       </div>
     </div>
     
     {/* Search Skeleton */}
     <div className="p-4 border-b border-gray-200 dark:border-gray-600">
-      <div className="h-12 bg-gray-200 dark:bg-zinc-600 rounded-xl animate-pulse"></div>
+      <div className="h-10 bg-gray-200 dark:bg-zinc-600 rounded-xl animate-pulse"></div>
     </div>
     
     {/* Categories Skeleton */}
-    <div className="flex overflow-x-auto p-3 border-b border-gray-200 dark:border-gray-600 space-x-2">
+    <div className="flex overflow-hidden p-3 border-b border-gray-200 dark:border-gray-600 space-x-1">
       {Array.from({ length: 7 }).map((_, i) => (
-        <div key={i} className="flex-shrink-0 w-16 h-16 bg-gray-200 dark:bg-zinc-600 rounded-xl animate-pulse"></div>
+        <div key={i} className="flex-shrink-0 w-13 h-12 bg-gray-200 dark:bg-zinc-600 rounded-xl animate-pulse"></div>
       ))}
     </div>
     
     {/* Emoji Grid Skeleton */}
-    <div className="h-80 p-3">
-      <div className="grid grid-cols-10 gap-1">
+    <div className="md:h-[14vw] p-1">
+      <div className="grid grid-cols-9 gap-1">
         {Array.from({ length: 80 }).map((_, i) => (
           <div key={i} className="w-10 h-10 bg-gray-200 dark:bg-zinc-600 rounded-lg animate-pulse"></div>
         ))}
@@ -58,7 +58,7 @@ export const EmojiSkeleton: React.FC = () => (
     </div>
     
     {/* Bottom indicator */}
-    <div className="px-4 py-2 bg-gray-50 dark:bg-zinc-800 border-t border-gray-200 dark:border-gray-600">
+    <div className="px-4 py-1 bg-gray-50 dark:bg-zinc-800 border-t border-gray-200 dark:border-gray-600">
       <div className="flex justify-center">
         <div className="w-12 h-1 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
       </div>

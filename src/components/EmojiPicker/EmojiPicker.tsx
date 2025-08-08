@@ -168,7 +168,7 @@ const EmojiPicker: React.FC<{
   }
 
   return (
-    <div className="w-full max-w-md mx-auto bg-white dark:bg-zinc-700 border border-gray-200 dark:border-gray-600 rounded-2xl shadow-xl overflow-hidden">
+    <div className="w-full max-w-md mx-auto bg-zinc-100 dark:bg-zinc-700 border border-gray-300 dark:border-gray-600 rounded-2xl shadow-xl overflow-hidden">
       {/* Header with tabs */}
       <Tabs activeTab={activeTab} onTabChange={setActiveTab} />
       
@@ -186,7 +186,7 @@ const EmojiPicker: React.FC<{
       )}
 
       {/* Content area */}
-      <div className="h-80 overflow-hidden">
+      <div className="md:h-[14vw] overflow-hidden">
         {activeTab === 'emoji' ? (
           <div
             ref={scrollContainerRef}
