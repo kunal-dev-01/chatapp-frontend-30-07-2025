@@ -30,9 +30,9 @@ const SelectedUserLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="w-full h-full relative ">
       <SelectedUserInfo />
-      <div className="w-full h-full">
+      <div className="w-full h-full bg-white">
         <Image
-          src={"/main.png"}
+          src={"/main-theme.png"}
           width={1200}
           height={720}
           alt={"chat-image"}
